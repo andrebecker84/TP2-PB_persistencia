@@ -63,7 +63,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:18080/api/v1/usuarios"]
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:18080/api/v1/usuarios || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
