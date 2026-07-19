@@ -1,0 +1,22 @@
+meta {
+  name: Revisao Especifica de um Post
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/historico/posts/1/revisoes/6
+  body: none
+  auth: none
+}
+
+docs {
+  Estado exato do post 1 na revisao 6.
+
+  Mesmo que o post tenha sido editado varias vezes depois, esta revisao continua
+  respondendo como ele estava naquele momento. E a essencia do historico por
+  snapshot: nao e preciso reconstruir o estado a partir de diffs.
+
+  O numero da revisao vem da resposta de "Historico de um Post". Um numero
+  inexistente retorna 404.
+}

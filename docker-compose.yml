@@ -1,0 +1,87 @@
+# =========================================================================
+# Infnet Hub — TP2
+#
+# O TP2 usa um bloco de portas próprio no host — 15432 · 18080 · 13000 — em vez
+# das usuais 5432/8080/3000. Motivo: as portas padrão são as primeiras a serem
+# disputadas por outros projetos, e as etapas do projeto integrado (TP1…TP5)
+# podem precisar rodar ao mesmo tempo. Dentro da rede do Compose os serviços
+# continuam conversando pelas portas internas de sempre.
+#
+# Todas as portas são sobrescrevíveis por variável de ambiente (ou pelo .env).
+# =========================================================================
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    # Nome com o TP explícito: container_name é global no Docker, e sem o sufixo
+    # as etapas seguintes disputariam o mesmo nome. O volume já é isolado pelo
+    # Compose, que o prefixa com o nome do projeto.
+    container_name: infnethub-tp2-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-infnethub}
+      POSTGRES_USER: ${DB_USER:-infnethub}
+      POSTGRES_PASSWORD: ${DB_PASS:-infnethub}
+    ports:
+      - "${DB_PORT:-15432}:5432"
+    volumes:
+      # Volume nomeado: é o que faz a persistência ser real. Sem ele o banco
+      # morreria junto com o contêiner e o TP2 não seria diferente do TP1.
+      #
+      # Montado em /var/lib/postgresql, e não em /var/lib/postgresql/data: a
+      # imagem do PostgreSQL 18 passou a guardar os dados em um subdiretório por
+      # versão (/var/lib/postgresql/18/docker), para permitir pg_upgrade --link
+      # sem cruzar fronteira de mount. Com a montagem antiga o contêiner recusa
+      # subir e acusa o volume como "unused" — os dados iriam para a camada
+      # efêmera e se perderiam junto com o contêiner.
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-infnethub} -d ${DB_NAME:-infnethub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: infnethub-tp2-backend
+    ports:
+      - "${BACKEND_PORT:-18080}:18080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SERVER_PORT=18080
+      # Dentro da rede do Compose o host do banco é o nome do serviço, e a porta
+      # é a interna (5432) — o mapeamento do host não se aplica aqui.
+      - DB_URL=jdbc:postgresql://postgres:5432/${DB_NAME:-infnethub}
+      - DB_USER=${DB_USER:-infnethub}
+      - DB_PASS=${DB_PASS:-infnethub}
+      # A origem do CORS é vista do navegador, então usa a porta publicada no host.
+      - CORS_ORIGINS=http://localhost:${FRONTEND_PORT:-13000}
+    depends_on:
+      # Espera o banco aceitar conexões, e não apenas o contêiner existir:
+      # o Flyway roda no start e falharia contra um PostgreSQL ainda subindo.
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18080/api/v1/usuarios"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: infnethub-tp2-frontend
+    ports:
+      - "${FRONTEND_PORT:-13000}:3000"
+    environment:
+      # URL resolvida pelo navegador, não pelo contêiner: por isso localhost e a
+      # porta publicada no host, e não o nome do serviço.
+      - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-18080}/api/v1
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

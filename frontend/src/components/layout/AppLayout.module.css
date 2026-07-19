@@ -1,0 +1,44 @@
+.app {
+  position: relative;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  background:
+    radial-gradient(ellipse 95% 55% at 50% 0%, rgba(59,142,245,.13) 0%, rgba(34,211,238,.05) 38%, transparent 66%),
+    radial-gradient(ellipse 58% 50% at 10% 28%, rgba(59,142,245,.08), transparent 60%),
+    radial-gradient(ellipse 52% 46% at 92% 72%, rgba(34,211,238,.07), transparent 62%),
+    var(--bg);
+}
+/* textura de linhas diagonais finas, esmaecendo nas bordas (como o exemplo) */
+.app::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: repeating-linear-gradient(118deg, rgba(255,255,255,.02) 0 1px, transparent 1px 23px);
+  -webkit-mask-image: radial-gradient(ellipse 92% 82% at 50% 22%, #000 28%, transparent 82%);
+          mask-image: radial-gradient(ellipse 92% 82% at 50% 22%, #000 28%, transparent 82%);
+}
+:global([data-theme="light"]) .app::before {
+  background-image: repeating-linear-gradient(118deg, rgba(20,40,90,.03) 0 1px, transparent 1px 23px);
+}
+
+.content {
+  flex: 1;
+  position: relative; z-index: 1;
+  /* sidebar flutua a 14px da borda com respiro de mais 14px — o conteúdo
+     começa depois desse conjunto */
+  margin-left: calc(var(--sidebar-w, var(--sidebar-mini)) + 28px);
+  transition: margin-left .24s cubic-bezier(.4,0,.2,1);
+  min-height: calc(100vh - var(--header-h));
+  /* abertura após o login: emenda com o "mergulho" da tela de login — o hub
+     vem de dentro da tela, crescendo até o lugar. Roda uma única vez, na
+     montagem do layout; como ele persiste entre rotas, não repete ao navegar */
+  animation: hubEntra .55s cubic-bezier(.22,1,.36,1);
+}
+@keyframes hubEntra {
+  from { opacity: 0; transform: perspective(1200px) translateY(18px) rotateX(2deg) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Responsivo: em telas estreitas a sidebar expandida sobrepõe o conteúdo
+   (é position:fixed) em vez de empurrá-lo — o conteúdo mantém a margem mini. */
+@media (max-width: 760px) {
+  .content { margin-left: calc(var(--sidebar-mini) + 28px) !important; }
+}

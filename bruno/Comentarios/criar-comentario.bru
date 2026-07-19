@@ -1,0 +1,22 @@
+meta {
+  name: Criar Comentário
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/posts/1/comentarios
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "conteudo": "Ótimo post! Muito esclarecedor.",
+    "autorId": 1
+  }
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Ultima Revisao de um Post (mesmo excluido)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/historico/posts/1/ultima-revisao
+  body: none
+  auth: none
+}
+
+docs {
+  Ultimo estado registrado do post, inclusive se ele ja foi excluido.
+
+  Para demonstrar: execute "Deletar Post" (pasta Posts) e depois esta
+  requisicao. O post nao existe mais na tabela posts, mas a auditoria ainda
+  responde o que ele dizia, com tipo "EXCLUSAO".
+
+  Isso depende de store_data_at_delete=true. No padrao do Envers, a revisao de
+  exclusao guardaria apenas o id e nulos nos demais campos.
+}

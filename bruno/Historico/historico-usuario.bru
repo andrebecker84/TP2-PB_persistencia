@@ -1,0 +1,25 @@
+meta {
+  name: Historico de um Usuario
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/historico/usuarios/1
+  body: none
+  auth: none
+}
+
+docs {
+  Revisoes do usuario 1, com o snapshot do cadastro em cada uma.
+
+  Util para rastrear mudancas sensiveis de identidade — troca de papel
+  (ALUNO -> PROFESSOR), correcao de e-mail institucional, mudanca de turma.
+
+  Ha endpoints equivalentes para vagas e comentarios:
+    GET /api/v1/historico/vagas/{id}
+    GET /api/v1/historico/comentarios/{id}
+
+  Nao ha endpoint de historico para curtidas: a entidade nao e auditada.
+  Uma curtida nao tem estado mutavel — e criada e removida, nunca editada.
+}

@@ -1,0 +1,37 @@
+meta {
+  name: Alterar Post (com autor)
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/posts/1
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  X-Usuario-Id: 2
+}
+
+body:json {
+  {
+    "titulo": "Titulo corrigido pelo professor",
+    "conteudo": "Conteudo revisado. Esta alteracao gera uma nova revisao no historico.",
+    "autorId": 2
+  }
+}
+
+docs {
+  Altera o post 1 identificando quem esta agindo pelo header X-Usuario-Id.
+
+  Como nao ha autenticacao nesta etapa (ela vem no TP5), o cliente informa o
+  usuario pelo header. O ContextoAuditoriaFilter resolve nome e e-mail e o
+  Envers grava esse autor na revisao.
+
+  Sem o header, a revisao fica atribuida a "anonimo". Sem requisicao HTTP
+  (a carga inicial, por exemplo), o autor e "sistema".
+
+  Depois de executar, rode "Historico de um Post" para ver a nova revisao.
+}

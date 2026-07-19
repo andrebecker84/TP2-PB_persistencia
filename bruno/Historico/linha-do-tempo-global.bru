@@ -1,0 +1,29 @@
+meta {
+  name: Linha do Tempo Global
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/historico/revisoes?pagina=0&tamanho=20
+  body: none
+  auth: none
+}
+
+params:query {
+  pagina: 0
+  tamanho: 20
+}
+
+docs {
+  Toda alteracao registrada no sistema, da mais recente para a mais antiga.
+
+  Enquanto os demais endpoints respondem "o que aconteceu com este registro?",
+  este responde a pergunta transversal: "o que aconteceu no sistema, e quem
+  fez?" — lendo apenas o cabecalho das revisoes, sem tocar em nenhuma tabela
+  _aud.
+
+  Numa base recem-carregada, as primeiras revisoes aparecem com autor "sistema"
+  e origem "interno": sao os dados iniciais, que nascem com historico porque o
+  DataLoader grava via JPA e nao por SQL bruto.
+}

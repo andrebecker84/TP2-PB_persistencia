@@ -1,0 +1,25 @@
+meta {
+  name: Historico de um Post
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/historico/posts/1?pagina=0&tamanho=20
+  body: none
+  auth: none
+}
+
+params:query {
+  pagina: 0
+  tamanho: 20
+}
+
+docs {
+  Todas as revisoes do post 1, da mais antiga para a mais recente.
+
+  Cada entrada traz o snapshot completo do post naquela revisao — o estado
+  inteiro, nao um diff — junto de quem alterou, quando e de onde.
+
+  Para ver uma alteracao aparecer aqui, execute antes "Alterar Post (com autor)".
+}

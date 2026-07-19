@@ -1,0 +1,27 @@
+meta {
+  name: Criar Vaga
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/vagas
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "titulo": "Estágio em Engenharia de Software",
+    "empresa": "TechCorp Brasil",
+    "descricao": "Desenvolvimento de aplicações web com Java e React.",
+    "localizacao": "Rio de Janeiro, RJ (Híbrido)",
+    "tipo": "ESTAGIO",
+    "categoria": "Backend",
+    "criadorId": 3
+  }
+}

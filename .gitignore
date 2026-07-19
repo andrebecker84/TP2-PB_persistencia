@@ -1,0 +1,129 @@
+# =========================================================================
+# TP2-PB_persistencia — arquivos fora do controle de versão
+#
+# Princípio: versiona-se o código e a configuração pública. Nunca credenciais,
+# artefatos de build, dependências baixadas, preferências de IDE ou dados locais.
+# =========================================================================
+
+# ── Contexto de desenvolvimento local ────────────────────────────────────
+CLAUDE.md
+.claude/
+
+# ── Credenciais e segredos ───────────────────────────────────────────────
+# .env.example é a exceção deliberada: documenta as variáveis sem trazer valor
+# nenhum. Está liberado no final deste arquivo.
+.env
+.env.*
+*.env
+secrets*
+credentials*
+
+# Configuração de perfil local do Spring — o lugar natural para alguém colar
+# uma senha de banco sem pensar.
+application-local.properties
+application-local.yml
+application-secrets.properties
+
+# Chaves e certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.ppk
+
+# ── Maven / Java ─────────────────────────────────────────────────────────
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.jar
+*.class
+hs_err_pid*
+replay_pid*
+
+# ── Dados locais ─────────────────────────────────────────────────────────
+# Banco H2 em arquivo gerado pelo perfil "h2" (application-h2.properties).
+# São dados de execução: não pertencem ao repositório.
+data/
+*.mv.db
+*.trace.db
+*.lock.db
+
+# Volume do PostgreSQL, caso alguém troque o volume nomeado por bind mount.
+postgres-data/
+pgdata/
+
+# ── Front-end (Next.js) ──────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/.next*
+frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ── IDEs ─────────────────────────────────────────────────────────────────
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+### Eclipse / STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+!.vscode/extensions.json
+
+# ── Sistema operacional ──────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── Logs e temporários ───────────────────────────────────────────────────
+*.log
+logs/
+*.tmp
+*.bak
+*.swp
+*~
+
+# ── Docker ───────────────────────────────────────────────────────────────
+.docker/
+docker-compose.override.yml
+
+# ── Exceções ─────────────────────────────────────────────────────────────
+# Modelo das variáveis de ambiente, sem segredo algum: precisa ser versionado
+# para que outra pessoa consiga subir o projeto.
+!.env.example

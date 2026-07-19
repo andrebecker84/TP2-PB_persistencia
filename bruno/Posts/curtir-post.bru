@@ -1,0 +1,31 @@
+meta {
+  name: Curtir / Descurtir Post
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/posts/1/curtidas?usuarioId=1
+  body: none
+  auth: none
+}
+
+params:query {
+  usuarioId: 1
+}
+
+docs {
+  Alterna a curtida do usuario 1 no post 1: se ainda nao curtiu, curte; se ja
+  curtiu, descurte. Responde { curtido, total }.
+
+  O total vem de um COUNT real sobre `curtidas` e e regravado em posts.curtidas
+  na mesma transacao — o contador desnormalizado do feed nunca diverge das
+  linhas. Execute duas vezes seguidas e observe o total subir e descer.
+
+  A constraint uk_curtidas_post_usuario impede curtida duplicada no banco, e nao
+  apenas na aplicacao: e ela que segura o contador honesto sob requisicoes
+  concorrentes.
+
+  Nao existe mais POST /posts/{id}/curtir: sem usuarioId, ele nao conseguia criar
+  a linha em `curtidas` e apenas inflava o contador.
+}

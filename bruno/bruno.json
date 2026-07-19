@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "TP1-PB Monolito — API Infnet Hub",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
