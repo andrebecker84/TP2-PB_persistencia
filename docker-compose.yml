@@ -72,12 +72,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # NEXT_PUBLIC_* entra no bundle do cliente em tempo de BUILD — precisa
+        # ser build-arg; como environment (runtime) não chega ao navegador.
+        # URL resolvida pelo navegador, não pelo contêiner: por isso localhost
+        # e a porta publicada no host, e não o nome do serviço.
+        - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-18080}/api/v1
     container_name: infnethub-tp2-frontend
     ports:
       - "${FRONTEND_PORT:-13000}:3000"
     environment:
-      # URL resolvida pelo navegador, não pelo contêiner: por isso localhost e a
-      # porta publicada no host, e não o nome do serviço.
+      # Mesmo valor para o lado servidor do Next (rewrites, SSR), que lê em runtime.
       - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-18080}/api/v1
     depends_on:
       backend:

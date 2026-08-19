@@ -71,6 +71,18 @@ yarn-error.log*
 pnpm-debug.log*
 .pnpm-store/
 
+# ── Originais de imagem ──────────────────────────────────────────────────
+# Os PNG baixados dos bancos de imagem são a MATÉRIA-PRIMA das ilustrações,
+# não o que a aplicação serve: cada um pesa entre 8 MB e 13 MB, e juntos
+# passam de 60 MB. O que vai para o navegador são os .webp derivados deles,
+# somando pouco mais de 1 MB no total.
+#
+# Ficam de fora porque o Git guarda binário para sempre: uma vez commitado,
+# o arquivo pesa em todo clone do repositório mesmo depois de removido. Os
+# originais seguem na pasta local de quem edita as imagens.
+frontend/public/images/**/vecteezy_*
+frontend/public/images/**/horizonte2.png
+
 # ── IDEs ─────────────────────────────────────────────────────────────────
 ### IntelliJ IDEA ###
 .idea/

@@ -1,0 +1,38 @@
+# Fora do contexto de build da imagem do BACK-END (context: .)
+#
+# O Dockerfile só copia pom.xml e src/, mas o Docker envia o contexto INTEIRO
+# ao daemon antes de qualquer COPY — sem estas exclusões, cada build do
+# back-end transferia o front-end completo (node_modules ~470MB + .next) à toa.
+
+# Front-end tem imagem própria (frontend/Dockerfile, context: ./frontend)
+frontend
+
+# Artefatos de build do back-end — a imagem compila do zero
+target
+
+# Controle de versão, docs e ferramentas — irrelevantes para a imagem
+.git
+.gitignore
+doc
+bruno
+README.md
+LICENSE
+
+# Contexto local de desenvolvimento — nunca dentro da imagem
+CLAUDE.md
+.claude
+
+# Segredos e ambiente local
+.env
+.env.*
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# SO / IDE
+.DS_Store
+Thumbs.db
+.idea
+.vscode
