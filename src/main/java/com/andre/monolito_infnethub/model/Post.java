@@ -33,6 +33,16 @@ public class Post extends EntidadeAuditavel {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String conteudo;
 
+    /**
+     * Capa opcional do post. Guarda apenas a REFERÊNCIA (caminho ou URL) — o
+     * binário nunca entra na linha: manter blobs na tabela do feed inflaria
+     * cada leitura da consulta principal, que é ordenada e paginada.
+     * É auditada: trocar a imagem de um post é uma edição editorial e precisa
+     * aparecer no histórico junto do texto.
+     */
+    @Column(name = "imagem_url", length = 500)
+    private String imagemUrl;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "autor_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_posts_autor"))

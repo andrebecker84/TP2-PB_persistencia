@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,6 +35,7 @@ public class DataLoader implements ApplicationRunner {
     private final VagaRepository       vagaRepository;
     private final CurtidaRepository    curtidaRepository;
     private final ComentarioRepository comentarioRepository;
+    private final JdbcTemplate         jdbc;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -72,6 +75,7 @@ public class DataLoader implements ApplicationRunner {
 
         Post p2 = postRepository.save(Post.builder()
                 .conteudo("Alguém já começou o TP2? Subi o PostgreSQL pelo Docker Compose, mas a aplicação não sobe: o Hibernate reclama que a tabela `comentarios` não existe. As migrations do Flyway não parecem estar rodando.")
+                .imagemUrl("/images/posts/persistencia.svg")
                 .autor(lucas).curtidas(0).build());
 
         Post p3 = postRepository.save(Post.builder()
@@ -86,12 +90,35 @@ public class DataLoader implements ApplicationRunner {
         Post p5 = postRepository.save(Post.builder()
                 .titulo("Aula ao vivo — Arquitetura de Microsserviços")
                 .conteudo("Na aula de hoje vamos decompor o monolito em microsserviços independentes usando Spring Cloud Gateway e Eureka para service discovery. Confirme presença no link da aula!")
+                .imagemUrl("/images/posts/agentes-ia.svg")
+                .autor(carlos).curtidas(0).build());
+
+        // ── Posts ilustrados ───────────────────────────────────────
+        Post p6 = postRepository.save(Post.builder()
+                .titulo("Hackathon Social Infnet — inscrições abertas")
+                .conteudo("Três dias para resolver um problema real de uma ONG parceira, em equipes de até cinco alunos. Vale 100h de Projeto Supervisionado de Extensão e as três primeiras colocações apresentam na Semana de Tecnologia. Inscrições até sexta.")
+                .imagemUrl("/images/posts/hackathon.svg")
+                .autor(secretaria).curtidas(0).build());
+
+        Post p7 = postRepository.save(Post.builder()
+                .titulo("Estágio em back-end Java — empresa parceira")
+                .conteudo("Vaga para estágio de 30h semanais em Java com Spring Boot e PostgreSQL, presencial no Rio. Conta como Estágio Obrigatório e a empresa aceita alunos a partir do segundo bloco. Currículos pela aba Vagas.")
+                .imagemUrl("/images/posts/vaga-estagio.svg")
+                .autor(secretaria).curtidas(0).build());
+
+        Post p8 = postRepository.save(Post.builder()
+                .titulo("Prazo limite dos TPs desta semana")
+                .conteudo("Lembrete: o prazo normal de entrega encerra na segunda-feira. Um TP entregue depois disso limita os conceitos do AT a DL; dois ou mais limitam a D. Confira no Moodle se o arquivo subiu de verdade — a responsabilidade pelo envio é de vocês.")
+                .imagemUrl("/images/posts/calendario-tp.svg")
                 .autor(carlos).curtidas(0).build());
 
         // ── Curtidas ───────────────────────────────────────────────
         curtir(p1, List.of(lucas, mariana, rafael));
         curtir(p2, List.of(carlos, mariana, rafael));
         curtir(p3, List.of(lucas, carlos, mariana, rafael));
+        curtir(p6, List.of(lucas, mariana, rafael, carlos));
+        curtir(p7, List.of(lucas, rafael));
+        curtir(p8, List.of(mariana, rafael));
         curtir(p4, List.of(lucas, mariana, rafael));
         curtir(p5, List.of(lucas, mariana, rafael));
 
@@ -160,6 +187,29 @@ public class DataLoader implements ApplicationRunner {
                 .descricao("Programa trainee de 18 meses com rotação em times de backend, infraestrutura e dados. Formação técnica intensiva.")
                 .localizacao("São Paulo, SP").tipo(TipoVaga.TRAINEE).categoria("Trainee")
                 .criador(secretaria).build());
+
+        // ── Datas escalonadas ──────────────────────────────────────
+        // O @CreatedDate grava tudo em now(): sem isto, o feed e a linha do
+        // tempo ficariam no mesmo instante. Ajuste por SQL nativo (não passa
+        // pelo listener de auditoria), espalhando os posts ao longo de semanas.
+        escalonarPost(p1, 24, 9);
+        escalonarPost(p2, 16, 20);
+        escalonarPost(p3, 9, 5);
+        escalonarPost(p4, 4, 12);
+        escalonarPost(p5, 1, 3);
+        // comentários poucas horas após o respectivo post (nunca no futuro)
+        jdbc.update("UPDATE comentarios c SET criado_em = p.criado_em + ((c.id % 5 + 1) * INTERVAL '2 hours'), "
+                  + "atualizado_em = p.criado_em + ((c.id % 5 + 1) * INTERVAL '2 hours') "
+                  + "FROM posts p WHERE c.post_id = p.id");
+        // vagas espalhadas nos últimos dias
+        jdbc.update("UPDATE vagas SET criado_em = NOW() - (id * INTERVAL '2 days'), "
+                  + "atualizado_em = NOW() - (id * INTERVAL '2 days')");
+    }
+
+    /** Reescreve criado_em/atualizado_em de um post para N dias e H horas atrás. */
+    private void escalonarPost(Post p, long dias, long horas) {
+        LocalDateTime d = LocalDateTime.now().minusDays(dias).minusHours(horas);
+        jdbc.update("UPDATE posts SET criado_em = ?, atualizado_em = ? WHERE id = ?", d, d, p.getId());
     }
 
     private void curtir(Post post, List<Usuario> usuarios) {

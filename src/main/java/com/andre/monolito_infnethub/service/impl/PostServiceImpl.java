@@ -92,6 +92,7 @@ public class PostServiceImpl implements PostService {
         Post post = Post.builder()
                 .titulo(dto.titulo())
                 .conteudo(dto.conteudo())
+                .imagemUrl(dto.imagemUrl())
                 .autor(autor)
                 .curtidas(0)
                 .build();
@@ -107,6 +108,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post não encontrado com id: " + id));
         post.setTitulo(dto.titulo());
         post.setConteudo(dto.conteudo());
+        post.setImagemUrl(dto.imagemUrl());
         return PostResponseDTO.fromEntity(postRepository.save(post), comentarioRepository.countByPostId(id));
     }
 

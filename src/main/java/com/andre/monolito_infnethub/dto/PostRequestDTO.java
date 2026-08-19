@@ -13,6 +13,10 @@ public record PostRequestDTO(
         String conteudo,
 
         @NotNull(message = "ID do autor é obrigatório")
-        Long autorId
+        Long autorId,
+
+        /** referência da capa (caminho servido pelo front ou URL) — opcional */
+        @Size(max = 500)
+        String imagemUrl
 
 ) {}
