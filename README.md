@@ -16,7 +16,7 @@
 [![Bruno](https://img.shields.io/badge/API_Tests-Bruno-orange)](https://www.usebruno.com)
 [![Testes](https://img.shields.io/badge/Testes-33_passando-success)](#testes-automatizados)
 [![Status](https://img.shields.io/badge/Status-Completo-success)](https://github.com/andrebecker84)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![License](https://img.shields.io/badge/Licen%C3%A7a-Uso%20Restrito%20%C2%B7%20N%C3%A3o%20Comercial-red)](LICENSE)
 
 # Infnet Hub — TP2: Camada de Persistência Real
 
@@ -44,6 +44,7 @@
 - [Tecnologias](#tecnologias)
 - [Relatório Técnico](#relatório-técnico)
 - [Licença](#licença)
+- [Privacidade e dados (LGPD)](#privacidade-e-dados-lgpd)
 - [Créditos](#créditos)
 
 ---
@@ -431,7 +432,39 @@ A documentação completa está consolidada em um único relatório, [`doc/RELAT
 
 ## Licença
 
-Distribuído sob a licença MIT. Veja [LICENSE](LICENSE) para mais informações.
+**Licença de Uso Restrito — Não Comercial.** Todos os direitos reservados.
+
+O código está publicado para ser lido, estudado e avaliado — o que é diferente
+de estar em domínio público.
+
+| | |
+|---|---|
+| ✅ **Livre** | Ler, estudar, clonar e executar localmente; citar com atribuição |
+| ⛔ **Requer autorização escrita** | Uso comercial · redistribuição · publicação de obras derivadas · apresentação como trabalho acadêmico próprio |
+
+O texto integral, com as definições, a cláusula de integridade acadêmica e o
+aviso de proteção de dados (LGPD), está em [LICENSE](LICENSE).
+
+Para solicitar autorização, abra uma
+[issue](https://github.com/andrebecker84/TP2-PB_persistencia/issues) no
+repositório.
+
+---
+
+## Privacidade e dados (LGPD)
+
+O repositório **não contém dados pessoais reais** — os registros semeados pelo
+`DataLoader` são fictícios. Esta etapa do projeto **não implementa
+autenticação**: a identidade de quem age vem do cabeçalho `X-Usuario-Id`, sem
+verificação, e por isso a aplicação não deve ser exposta à internet nem receber
+dados reais.
+
+Um ponto merece destaque de quem for implantá-la: a trilha de auditoria grava
+nome e e-mail do autor **por extenso**, para permanecer legível depois que o
+usuário for removido. A consequência é que excluir um usuário **não** apaga sua
+identificação das tabelas `*_aud`. É uma decisão deliberada — a rastreabilidade
+depende dela —, mas precisa ser conciliada com o direito à eliminação. O
+[Anexo I da LICENSE](LICENSE) detalha o assunto.
 
 ---
 
@@ -440,9 +473,13 @@ Distribuído sob a licença MIT. Veja [LICENSE](LICENSE) para mais informações
 | Asset | Autor | Licença |
 |---|---|---|
 | Foto da página de login | [Meredith Spencer](https://unsplash.com/@meredithspencer) no Unsplash | [Unsplash License](https://unsplash.com/license) — uso gratuito |
+| Ilustrações 3D da página 404 — antena, satélite e astronauta | [Vecteezy](https://www.vecteezy.com) | [Vecteezy License](https://www.vecteezy.com/licensing-agreement) — atribuição exigida |
 
 Foto: *"Um grupo de pessoas andando em uma calçada"* —
 https://unsplash.com/pt-br/fotografias/um-grupo-de-pessoas-andando-em-uma-calcada-QfE2FAW_oPI
+
+As ilustrações da página 404 foram convertidas para WebP e ajustadas em cor e
+recorte para integrar a cena. Os originais não são versionados.
 
 ---
 

@@ -1,21 +1,252 @@
-MIT License
+LICENÇA DE USO RESTRITO — NÃO COMERCIAL
+Infnet Hub · Projeto de Bloco: Engenharia de Softwares Escaláveis
 
-Copyright (c) 2026 André Becker
+Copyright (c) 2026 André Luis Becker. Todos os direitos reservados.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+================================================================================
+PREÂMBULO — o que esta licença faz, em português claro
+================================================================================
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Este é um trabalho acadêmico, publicado abertamente para que possa ser lido,
+estudado, executado e avaliado. Isso é diferente de ser de domínio público.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  PODE, sem pedir nada a ninguém:
+    · ler, estudar e analisar o código;
+    · clonar e executar localmente para aprender ou avaliar;
+    · citar trechos em trabalhos acadêmicos, com atribuição.
+
+  NÃO PODE, sem autorização escrita do titular:
+    · usar em produto, serviço ou atividade com finalidade comercial;
+    · redistribuir, publicar ou hospedar o projeto, no todo ou em parte;
+    · publicar obras derivadas;
+    · apresentar este trabalho, ou derivação dele, como produção acadêmica
+      própria em qualquer instituição de ensino.
+
+Este preâmbulo resume as cláusulas a seguir e não as substitui. Em caso de
+divergência, prevalece o texto das cláusulas.
+
+================================================================================
+1. DEFINIÇÕES
+================================================================================
+
+1.1. "Software" — o código-fonte, a documentação, os diagramas, as migrations,
+     os testes e os demais arquivos deste repositório, exceto os Materiais de
+     Terceiros descritos na Cláusula 6.
+
+1.2. "Titular" — André Luis Becker, autor e detentor dos direitos patrimoniais
+     sobre o Software.
+
+1.3. "Você" — a pessoa física ou jurídica que acessa, copia ou executa o
+     Software.
+
+1.4. "Finalidade Comercial" — qualquer uso destinado, direta ou indiretamente,
+     a vantagem comercial ou remuneração, inclusive uso interno por pessoa
+     jurídica em suas atividades produtivas, prestação de serviços a terceiros,
+     incorporação a produto ofertado ao mercado e uso em treinamento de modelos
+     comercializados.
+
+1.5. "Finalidade Não Comercial" — uso pessoal, de pesquisa, de ensino ou de
+     avaliação acadêmica, sem as características do item 1.4.
+
+================================================================================
+2. CONCESSÃO LIMITADA
+================================================================================
+
+O Titular concede a Você licença mundial, gratuita, não exclusiva,
+intransferível, não sublicenciável e revogável para:
+
+  a) acessar, executar e estudar o Software para Finalidade Não Comercial;
+  b) reproduzir o Software em sua máquina na medida necessária ao item (a);
+  c) modificar o Software localmente, para estudo, sem publicar o resultado;
+  d) citar trechos em trabalhos acadêmicos ou técnicos, desde que com
+     atribuição ao Titular e indicação da origem.
+
+Nenhum outro direito é concedido. Direitos não expressamente concedidos aqui
+permanecem reservados ao Titular.
+
+================================================================================
+3. RESTRIÇÕES
+================================================================================
+
+Sem autorização prévia e por escrito do Titular, é vedado:
+
+3.1. Empregar o Software, no todo ou em parte, para Finalidade Comercial.
+
+3.2. Distribuir, publicar, hospedar, disponibilizar em rede, comercializar,
+     alugar, emprestar ou de outro modo transferir o Software a terceiros.
+
+3.3. Publicar obras derivadas, adaptações ou versões modificadas.
+
+3.4. Sublicenciar o Software ou relicenciá-lo sob outros termos, inclusive sob
+     licenças de código aberto.
+
+3.5. Remover, ocultar ou alterar avisos de autoria, de copyright ou esta
+     licença.
+
+3.6. INTEGRIDADE ACADÊMICA. Apresentar o Software, ou trabalho dele derivado,
+     como produção própria em atividade avaliativa, trabalho de conclusão,
+     processo seletivo ou publicação, em qualquer instituição de ensino.
+     Esta restrição é o principal objetivo desta licença: o Software é o
+     resultado de um percurso acadêmico individual, e sua reapresentação por
+     terceiros como trabalho próprio configura, além de violação contratual,
+     fraude acadêmica perante a instituição envolvida.
+
+3.7. Utilizar o Software como dado de treinamento para modelos de aprendizado
+     de máquina destinados a exploração comercial.
+
+================================================================================
+4. AUTORIZAÇÕES EXCEPCIONAIS
+================================================================================
+
+Usos fora do escopo da Cláusula 2 podem ser autorizados. O pedido deve ser
+dirigido ao Titular, por escrito, descrevendo o uso pretendido, sua extensão e
+sua finalidade. A autorização, quando concedida, será específica para o uso
+descrito e não se estende a usos posteriores.
+
+Contato: abrir uma issue no repositório oficial do projeto, em
+https://github.com/andrebecker84/TP2-PB_persistencia/issues, ou entrar em
+contato pelo perfil https://github.com/andrebecker84
+
+================================================================================
+5. VIGÊNCIA E RESCISÃO
+================================================================================
+
+5.1. A licença vigora enquanto Você cumprir estes termos.
+
+5.2. O descumprimento de qualquer cláusula extingue a licença automaticamente,
+     independentemente de notificação, obrigando Você a cessar o uso e destruir
+     as cópias em seu poder.
+
+5.3. A extinção não prejudica os direitos do Titular quanto a violações
+     ocorridas durante a vigência.
+
+================================================================================
+6. MATERIAIS DE TERCEIROS
+================================================================================
+
+O repositório contém materiais que NÃO pertencem ao Titular e que NÃO são
+licenciados por este documento. Cada um permanece sujeito à licença de seu
+respectivo detentor, que prevalece sobre os termos acima:
+
+  · Fotografia de fundo da página de login — Meredith Spencer, via Unsplash.
+    Unsplash License (https://unsplash.com/license).
+
+  · Ilustrações 3D da página 404 (antena, satélite, astronauta) — Vecteezy
+    (https://www.vecteezy.com). Sujeitas à Vecteezy License, que exige
+    atribuição na versão gratuita e restringe a redistribuição do material
+    como arquivo isolado. Os arquivos versionados aqui são derivações em
+    formato WebP, empregadas como parte integrante da interface.
+
+  · Bibliotecas e frameworks declarados em `pom.xml` e `package.json` —
+    licenciados por seus respectivos autores, majoritariamente sob Apache-2.0
+    e MIT. Esta licença não os alcança.
+
+A concessão da Cláusula 2 recai sobre a contribuição original do Titular. Ao
+reutilizar os Materiais de Terceiros, Você deve observar as licenças de origem
+diretamente.
+
+================================================================================
+7. AUSÊNCIA DE GARANTIA
+================================================================================
+
+O SOFTWARE É FORNECIDO "NO ESTADO EM QUE SE ENCONTRA", SEM GARANTIA DE
+QUALQUER NATUREZA, EXPRESSA OU IMPLÍCITA, INCLUINDO, SEM LIMITAÇÃO, GARANTIAS
+DE COMERCIABILIDADE, ADEQUAÇÃO A FINALIDADE ESPECÍFICA, PRECISÃO E NÃO
+VIOLAÇÃO DE DIREITOS DE TERCEIROS.
+
+Trata-se de trabalho acadêmico, concebido para fins didáticos. Não foi
+submetido a auditoria de segurança nem a homologação para uso produtivo.
+
+================================================================================
+8. LIMITAÇÃO DE RESPONSABILIDADE
+================================================================================
+
+Na máxima extensão permitida pela legislação aplicável, o Titular não responde
+por danos diretos, indiretos, incidentais, especiais, punitivos ou emergentes,
+nem por lucros cessantes, perda de dados ou interrupção de atividades,
+decorrentes do uso ou da impossibilidade de uso do Software, ainda que
+advertido da possibilidade de tais danos.
+
+================================================================================
+9. LEGISLAÇÃO APLICÁVEL E FORO
+================================================================================
+
+Esta licença rege-se pelas leis da República Federativa do Brasil, em especial
+a Lei nº 9.610/1998 (Direitos Autorais) e a Lei nº 9.609/1998 (Proteção da
+Propriedade Intelectual de Programa de Computador).
+
+Fica eleito o foro da comarca de domicílio do Titular para dirimir controvérsias
+oriundas desta licença, com renúncia a qualquer outro, por mais privilegiado
+que seja.
+
+================================================================================
+ANEXO I — AVISO DE PROTEÇÃO DE DADOS (LGPD)
+================================================================================
+
+Este anexo é um AVISO informativo. Não integra a concessão de licença: uma
+licença rege direitos autorais, enquanto a proteção de dados pessoais é regida
+pela Lei nº 13.709/2018 (LGPD), que se aplica por força de lei e não por
+contrato. Os dois assuntos constam do mesmo arquivo por conveniência de quem
+avalia o projeto.
+
+A.1. DADOS CONTIDOS NO REPOSITÓRIO
+     O repositório NÃO contém dados pessoais reais. Os registros semeados pelo
+     `DataLoader` — nomes, e-mails, publicações e vagas — são FICTÍCIOS,
+     criados para demonstrar a camada de persistência. Qualquer semelhança com
+     pessoas reais é coincidência e deve ser comunicada ao Titular para
+     remoção.
+
+A.2. QUEM RESPONDE PELOS DADOS
+     O Titular não opera qualquer instância deste Software em produção e não
+     trata dados pessoais de terceiros por meio dele. Quem implantar o Software
+     e nele inserir dados pessoais assume, para todos os efeitos da LGPD, a
+     posição de CONTROLADOR, respondendo pela base legal do tratamento, pelo
+     atendimento aos direitos dos titulares (art. 18) e pela comunicação de
+     incidentes (art. 48).
+
+A.3. CARACTERÍSTICAS RELEVANTES DA IMPLEMENTAÇÃO
+     Quem for implantar deve conhecer três pontos do desenho atual:
+
+     a) AUSÊNCIA DE AUTENTICAÇÃO. Esta etapa do projeto não implementa
+        autenticação nem autorização. A identidade de quem age é informada pelo
+        cliente no cabeçalho `X-Usuario-Id`, sem verificação. O Software, tal
+        como está, NÃO deve ser exposto à internet nem receber dados pessoais
+        reais.
+
+     b) REGISTRO DE AUDITORIA COM IDENTIFICAÇÃO POR EXTENSO. A trilha de
+        auditoria (Hibernate Envers) grava nome e e-mail do autor de cada
+        alteração como texto literal, e não como chave estrangeira, para que o
+        registro permaneça legível após a exclusão do usuário. A consequência
+        é relevante sob a LGPD: excluir um usuário da tabela `usuarios` NÃO
+        remove sua identificação das tabelas `*_aud`.
+
+        Isso é uma decisão de projeto, não um descuido — a rastreabilidade
+        depende disso. Mas uma implantação real precisa conciliá-la com o
+        direito à eliminação (art. 18, VI), tipicamente invocando a guarda para
+        cumprimento de obrigação legal ou regulatória (art. 16, I) ou aplicando
+        anonimização dos campos de autoria nas revisões.
+
+     c) HISTÓRICO COMPLETO DOS REGISTROS. A configuração
+        `store_data_at_delete=true` faz com que a revisão de exclusão preserve
+        o estado integral do registro apagado, e não apenas seu identificador.
+        Registros excluídos permanecem reconstituíveis a partir das tabelas de
+        auditoria.
+
+A.4. MEDIDAS ESPERADAS DE QUEM IMPLANTAR
+     Definir base legal para o tratamento; implementar autenticação e controle
+     de acesso; estabelecer política de retenção para as tabelas de auditoria;
+     restringir o acesso direto ao banco; e manter registro das operações de
+     tratamento (art. 37).
+
+A.5. CONTATO
+     Comunicações sobre dados pessoais relacionadas a este repositório devem
+     ser dirigidas ao Titular pelos canais indicados na Cláusula 4.
+
+================================================================================
+
+Este documento foi redigido para um projeto acadêmico e não constitui
+aconselhamento jurídico. Para uso com consequências patrimoniais relevantes,
+recomenda-se revisão por profissional habilitado. Equivalentes padronizados de
+mercado para o mesmo propósito: PolyForm Noncommercial License 1.0.0
+(https://polyformproject.org/licenses/noncommercial/1.0.0/) e
+Creative Commons BY-NC-ND 4.0 (https://creativecommons.org/licenses/by-nc-nd/4.0/).
