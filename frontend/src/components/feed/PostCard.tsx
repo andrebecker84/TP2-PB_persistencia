@@ -286,6 +286,14 @@ export default function PostCard({ post, currentUser, onEditar, onDeletar, onPos
         <TextoExpansivel texto={post.conteudo} className={styles.conteudo} />
       </div>
 
+      {/* ── Capa ── */}
+      {post.imagemUrl && (
+        <figure className={styles.capa}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={post.imagemUrl} alt={post.titulo ?? "Imagem do post"} loading="lazy" />
+        </figure>
+      )}
+
       {/* ── Engajamento: reações · comentar · compartilhar (contadores à esquerda,
              avatares de quem curtiu à direita) ── */}
       <div className={styles.engage}>

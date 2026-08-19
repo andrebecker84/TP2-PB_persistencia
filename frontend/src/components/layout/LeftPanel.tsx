@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  ChevronLeft, ChevronRight, CheckCircle2, Clock, Circle, AlertCircle,
-  CalendarDays, ListChecks, TriangleAlert,
+  ChevronLeft, ChevronRight, ChevronDown, CheckCircle2, Clock, Circle, AlertCircle,
+  CalendarDays, ListChecks, TriangleAlert, Check,
 } from "lucide-react";
 import DragScroll from "@/components/ui/DragScroll";
 import MarqueeText from "@/components/ui/MarqueeText";
@@ -95,6 +95,11 @@ export default function LeftPanel() {
   const [faixa,    setFaixa]    = useState<Faixa>("trimestre");
   const [tip,  setTip]  = useState<TooltipPos | null>(null);
   const [menu, setMenu] = useState<MenuPos | null>(null);
+  // seções do kanban recolhidas (por status) — começam TODAS recolhidas
+  const [colapsadas, setColapsadas] = useState<Set<Status>>(() => new Set(STATUS_ORDER));
+  const toggleCol = (s: Status) => setColapsadas(prev => {
+    const n = new Set(prev); n.has(s) ? n.delete(s) : n.add(s); return n;
+  });
 
   // tarefas dentro da faixa escolhida (janela em torno de hoje)
   const tarefasVisiveis = useMemo(() => {
@@ -106,6 +111,14 @@ export default function LeftPanel() {
       return v >= min && v <= max;
     });
   }, [tarefas, faixa]);
+
+  // agrupa as tarefas visíveis por status efetivo (colunas do kanban vertical)
+  const grupos = useMemo(() => {
+    const g: Record<Status, { t: Tarefa; idx: number }[]> =
+      { done: [], pending: [], nao_iniciada: [], atrasada: [] };
+    tarefasVisiveis.forEach(t => g[efetivo(t).status].push({ t, idx: tarefas.indexOf(t) }));
+    return g;
+  }, [tarefasVisiveis, tarefas]);
 
   // distribuição de status sobre TODAS as tarefas (para o gráfico de progresso)
   const contagem = useMemo<Contagem>(() => {
@@ -199,8 +212,52 @@ export default function LeftPanel() {
         </div>
       </div>
 
-      {/* ── Tarefas & Entregas ── */}
-      <div className={styles.card}>
+      {/* ── Tarefas & Entregas — kanban por status, em bloco de notas espiral ── */}
+      <div className={`${styles.card} ${styles.cardNotas}`}>
+        {/* espiral metálica (gunmetal) do caderno, straddling a borda superior,
+            com furos perfurados na chapa por onde o fio passa */}
+        <div className={styles.espiral} aria-hidden>
+          <svg viewBox="0 0 240 26" preserveAspectRatio="none">
+            <defs>
+              {/* aço equilibrado: reflexo alto → especular → meia-sombra → reflexo
+                  baixo → base (nem cromado claro, nem preto) */}
+              <linearGradient id="coilChrome" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0"   stopColor="#9aa6b8" />
+                <stop offset=".22" stopColor="#dde6f2" />
+                <stop offset=".46" stopColor="#4e596b" />
+                <stop offset=".7"  stopColor="#8b97aa" />
+                <stop offset="1"   stopColor="#39424f" />
+              </linearGradient>
+            </defs>
+            {Array.from({ length: 11 }).map((_, i) => {
+              const cx = 13 + i * 21.4;
+              const w = 2.5;   // meia-largura da argola
+              // loop reto (∩) com duas pernas descendo até a chapa
+              const loop = `M${cx - w} 16 L${cx - w} 7 Q${cx - w} 3 ${cx} 3 Q${cx + w} 3 ${cx + w} 7 L${cx + w} 16`;
+              return (
+                <g key={i}>
+                  {/* sombra do espiral projetada no card (deslocada) */}
+                  <path d={loop} fill="none" stroke="rgba(0,0,0,.4)" strokeWidth="2.7"
+                    strokeLinecap="round" transform="translate(1.3 2.2)" />
+                  {/* fio principal de metal (loop) */}
+                  <path d={loop} fill="none" stroke="url(#coilChrome)" strokeWidth="2.4" strokeLinecap="round" />
+                  {/* brilho especular no fio (reflexo) */}
+                  <path d={loop} fill="none" stroke="rgba(246,250,255,.75)" strokeWidth=".8"
+                    strokeLinecap="round" transform="translate(-.6 0)" strokeDasharray="0 5 6 40" />
+                  {/* FURAÇÃO no card — MAIOR que o fio (é um buraco por onde ele
+                      passa por dentro); desenhada por cima das pernas */}
+                  <rect x={cx - 4.4} y="12.5" width="8.8" height="8" rx="4" fill="#04070d" />
+                  {/* sombra interna no topo do furo (profundidade) */}
+                  <path d={`M${cx - 3.4} 13.6 Q${cx} 11.9 ${cx + 3.4} 13.6`} fill="none"
+                    stroke="rgba(0,0,0,.75)" strokeWidth="1.1" strokeLinecap="round" />
+                  {/* LUZ dentro do furo (rim iluminado no fundo → furação visível) */}
+                  <path d={`M${cx - 3.4} 19 Q${cx} 21.2 ${cx + 3.4} 19`} fill="none"
+                    stroke="rgba(150,178,224,.6)" strokeWidth="1.1" strokeLinecap="round" />
+                </g>
+              );
+            })}
+          </svg>
+        </div>
         <h3 className={styles.title}><ListChecks size={15} className={styles.titleIco} /> Tarefas &amp; Entregas</h3>
 
         <div className={styles.faixaRow}>
@@ -219,34 +276,69 @@ export default function LeftPanel() {
           <p className={styles.tarefaVazio}>Nenhuma entrega nesta faixa.</p>
         ) : (
           <DragScroll className={styles.tarefaScroll}>
-            {tarefasVisiveis.map((t) => {
-              const idx = tarefas.indexOf(t);
-              const { status: efStatus, atraso } = efetivo(t);
-              const avisoAndamento = atraso && efStatus === "pending";
+            {STATUS_ORDER.map(s => {
+              const items = grupos[s];
+              if (items.length === 0) return null;
+              const aberto = !colapsadas.has(s);
+              const temAtraso = items.some(({ t }) => efetivo(t).atraso);
               return (
-                <div key={idx} data-marquee-host className={`${styles.tarefaItem} ${efStatus === "done" ? styles.tarefaDone : ""}`}>
+                <section key={s} className={`${styles.kbGroup} ${styles[`kb_${s}`]}`}>
                   <button
-                    className={styles.tarefaStatus}
-                    onClick={(e) => openMenu(e, idx)}
-                    title="Alterar status"
-                    aria-label={`Status: ${STATUS_LABEL[efStatus]} — clique para alterar`}
+                    className={styles.kbHead}
+                    onClick={() => toggleCol(s)}
+                    aria-expanded={aberto}
                   >
-                    <StatusIcon status={efStatus} size={18} />
+                    <ChevronDown size={13} className={`${styles.kbChevron} ${aberto ? "" : styles.kbChevronCol}`} />
+                    <StatusIcon status={s} size={13} />
+                    <span className={styles.kbLabel}>{STATUS_LABEL[s]}</span>
+                    {temAtraso && (
+                      <span className={styles.atrasoBadge} title="Há tarefa(s) atrasada(s) neste grupo">
+                        <TriangleAlert size={12} />
+                      </span>
+                    )}
+                    <span className={styles.kbCount}>{items.length}</span>
                   </button>
-                  <div className={styles.tarefaInfo}>
-                    <MarqueeText className={styles.tarefaTitulo}>{t.titulo}</MarqueeText>
-                    <span className={styles.tarefaMeta}>
-                      <MarqueeText className={styles.tarefaGrupo}>{t.grupo}</MarqueeText>
-                      {avisoAndamento && (
-                        <span className={styles.avisoAtraso}><TriangleAlert size={10} /> atrasada</span>
-                      )}
-                    </span>
-                  </div>
-                  <span className={styles.tarefaData}>
-                    <CalendarDays size={12} className={styles.tarefaDataIco} />
-                    {t.data}
-                  </span>
-                </div>
+                  {aberto && (
+                    <div className={styles.kbBody}>
+                      {items.map(({ t, idx }) => {
+                        const atrasada = efetivo(t).atraso;
+                        return (
+                          <div key={idx} data-marquee-host className={`${styles.tarefaItem} ${s === "done" ? styles.tarefaDone : ""} ${atrasada ? styles.tarefaAtrasada : ""}`}>
+                            <button
+                              className={styles.tarefaCheck}
+                              onClick={(e) => openMenu(e, idx)}
+                              title="Alterar status"
+                              aria-label={`Status: ${STATUS_LABEL[s]} — clique para alterar`}
+                            >
+                              <span className={`${styles.checkBox} ${styles[`chk_${s}`]}`}>
+                                {s === "done"
+                                  ? <Check size={11} strokeWidth={3} />
+                                  : <StatusIcon status={s} size={13} />}
+                              </span>
+                            </button>
+                            <div className={styles.tarefaInfo}>
+                              <div className={styles.tarefaTituloRow}>
+                                {atrasada && (
+                                  <span className={styles.atrasoBadge} title="Tarefa atrasada, verificar com urgência!" aria-label="Tarefa atrasada, verificar com urgência!">
+                                    <TriangleAlert size={12} />
+                                  </span>
+                                )}
+                                <MarqueeText className={styles.tarefaTitulo}>{t.titulo}</MarqueeText>
+                              </div>
+                              <span className={styles.tarefaMeta}>
+                                <MarqueeText className={styles.tarefaGrupo}>{t.grupo}</MarqueeText>
+                              </span>
+                            </div>
+                            <span className={styles.tarefaData}>
+                              <CalendarDays size={12} className={styles.tarefaDataIco} />
+                              {t.data}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
               );
             })}
           </DragScroll>

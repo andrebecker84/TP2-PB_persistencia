@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { TrendingUp } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { TrendingUp, CheckCircle2, Clock, CircleDashed, AlertCircle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import styles from "./ProgressoEntregas.module.css";
 
 export interface Contagem { done: number; pending: number; nao_iniciada: number; atrasada: number; }
@@ -14,30 +15,74 @@ const PERIODOS = [
   { label: "Semestre",  ini: "2026-05-04", fim: "2026-12-19" },
 ];
 
-const SEGS: { key: keyof Contagem; label: string; cor: string }[] = [
-  { key: "done",         label: "Concluídas",    cor: "var(--success)" },
-  { key: "pending",      label: "Em andamento",  cor: "var(--warning)" },
-  { key: "nao_iniciada", label: "Não iniciadas", cor: "var(--text-dim)" },
-  { key: "atrasada",     label: "Atrasadas",     cor: "var(--danger)"  },
+const SEGS: { key: keyof Contagem; label: string; cor: string; icon: LucideIcon }[] = [
+  { key: "done",         label: "Concluídas",    cor: "#34d399", icon: CheckCircle2 },
+  { key: "pending",      label: "Em andamento",  cor: "#fbbf24", icon: Clock        },
+  { key: "nao_iniciada", label: "Não iniciadas", cor: "#94a3b8", icon: CircleDashed },
+  { key: "atrasada",     label: "Atrasadas",     cor: "#f87171", icon: AlertCircle  },
 ];
 
 const R = 26, C = 2 * Math.PI * R;
+
+/* ── Contador estilo letreiro de aeroporto (split-flap) ──
+   conta do valor anterior até o alvo em ~900ms; cada dígito é remontado
+   quando muda (key = posição+valor) e a animação de flap toca de novo, dando
+   o efeito da placa girando até assentar. Roda no load e a cada mudança. */
+function useCountUp(target: number, duration = 950): number {
+  const [val, setVal] = useState(0);
+  const prev = useRef(0);
+  useEffect(() => {
+    const from = prev.current;
+    const to = target;
+    if (from === to) return;
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / duration);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cúbico: desacelera ao assentar
+      setVal(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else { prev.current = to; setVal(to); }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return val;
+}
+
+function FlapPercent({ value }: { value: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  // só "arma" o count-up quando o card está de fato visível: com a aba oculta o
+  // requestAnimationFrame fica pausado e o número saltaria pro alvo sem o
+  // letreiro rolar. Assim o efeito toca no load e a cada reload/reveal.
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const arma = () => { if (document.visibilityState === "visible") setArmed(true); };
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) arma(); }, { threshold: 0.4 });
+    io.observe(el);
+    document.addEventListener("visibilitychange", arma);
+    return () => { io.disconnect(); document.removeEventListener("visibilitychange", arma); };
+  }, []);
+  const shown = useCountUp(armed ? value : 0);
+  const digits = String(shown).split("");
+  return (
+    <span ref={ref} className={styles.flapWrap} aria-label={`${value}% concluído`}>
+      {digits.map((d, i) => (
+        <span key={`${i}-${d}`} className={styles.flap}>{d}</span>
+      ))}
+      <span className={styles.flapPct}>%</span>
+    </span>
+  );
+}
 
 export default function ProgressoEntregas({ contagem }: { contagem: Contagem }) {
   const total = SEGS.reduce((s, seg) => s + contagem[seg.key], 0);
   const pctConcluido = total ? Math.round((contagem.done / total) * 100) : 0;
 
-  // arcos do donut, acumulados
-  const arcos = useMemo(() => {
-    let acc = 0;
-    return SEGS.map(seg => {
-      const val = contagem[seg.key];
-      const dash = total ? (val / total) * C : 0;
-      const el = { cor: seg.cor, dash, offset: -acc };
-      acc += dash;
-      return el;
-    });
-  }, [contagem, total]);
+  // arco único de conclusão (pct do total)
+  const arcoConcluido = (pctConcluido / 100) * C;
 
   const periodos = PERIODOS.map(p => {
     const ini = new Date(p.ini + "T00:00:00").getTime();
@@ -51,37 +96,72 @@ export default function ProgressoEntregas({ contagem }: { contagem: Contagem }) 
     <div className={styles.card}>
       <h3 className={styles.title}><TrendingUp size={15} className={styles.titleIco} /> Progresso das Entregas</h3>
 
+      {/* "X de Y concluídas" à esquerda + anel de conclusão com gradiente à direita */}
       <div className={styles.donutRow}>
-        <div className={styles.donutWrap}>
-          <svg viewBox="0 0 64 64" className={styles.donut} aria-hidden>
-            <circle cx="32" cy="32" r={R} className={styles.donutTrilho} />
-            {arcos.map((a, i) => a.dash > 0 && (
-              <circle
-                key={i} cx="32" cy="32" r={R} fill="none"
-                stroke={a.cor} strokeWidth="7"
-                strokeDasharray={`${a.dash} ${C - a.dash}`}
-                strokeDashoffset={a.offset}
-                transform="rotate(-90 32 32)"
-                strokeLinecap="butt"
-                style={{ filter: `drop-shadow(0 0 2.5px ${a.cor})` }}
-              />
-            ))}
-          </svg>
-          <div className={styles.donutCentro}>
-            <span className={styles.donutPct}>{pctConcluido}%</span>
-            <span className={styles.donutSub}>concluído</span>
+        <div className={styles.statBlock}>
+          <span className={styles.statNum}>{contagem.done}</span>
+          <div className={styles.statMeta}>
+            <span className={styles.statDe}>de {total}</span>
+            <span className={styles.statSub}>concluídas</span>
           </div>
         </div>
+        <div
+          className={styles.donutWrap}
+          aria-label={`${pctConcluido}% concluído`}
+        >
+          <div className={styles.donutGlow} aria-hidden />
+          <svg viewBox="0 0 64 64" className={styles.donut} aria-hidden>
+            <defs>
+              <linearGradient id="progGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"   stopColor="#3b8ef5" />
+                <stop offset="52%"  stopColor="#7c5cff" />
+                <stop offset="100%" stopColor="#22d3ee" />
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r={R} className={styles.donutTrilho} />
+            <circle
+              cx="32" cy="32" r={R} fill="none"
+              stroke="url(#progGrad)" strokeWidth="6" strokeLinecap="round"
+              strokeDasharray={`${arcoConcluido} ${C}`}
+              transform="rotate(-90 32 32)"
+              className={styles.donutArc}
+            />
+          </svg>
+          <div className={styles.donutCentro}>
+            <FlapPercent value={pctConcluido} />
+          </div>
+        </div>
+      </div>
 
-        <ul className={styles.legenda}>
-          {SEGS.map(seg => (
-            <li key={seg.key} className={styles.legItem}>
-              <span className={styles.legDot} style={{ background: seg.cor }} />
-              <span className={styles.legLabel}>{seg.label}</span>
-              <span className={styles.legVal}>{contagem[seg.key]}</span>
-            </li>
-          ))}
-        </ul>
+      {/* uma barra de progresso segmentada por categoria, com ícone e texto na
+          cor da categoria (estilo da referência) */}
+      <div className={styles.catList}>
+        {SEGS.map(seg => {
+          const val = contagem[seg.key];
+          const pct = total ? Math.round((val / total) * 100) : 0;
+          const Icon = seg.icon;
+          return (
+            /* a cor identifica a categoria só nas MARCAS — ícone e barra.
+               Números e rótulos ficam na tipografia da plataforma, senão a
+               coluna inteira vira um mostruário de cores. */
+            <div key={seg.key} className={styles.catRow}>
+              <span className={styles.catIco} style={{ color: seg.cor }}>
+                <Icon size={14} />
+              </span>
+              <div className={styles.catBody}>
+                <div className={styles.catHead}>
+                  <span className={styles.catLabel}>
+                    <b className={styles.catCount}>{val}</b> {seg.label}
+                  </span>
+                  <span className={styles.catPct}>{pct}%</span>
+                </div>
+                <div className={styles.catTrack}>
+                  <span className={styles.catFill} style={{ width: `${pct}%`, background: seg.cor }} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className={styles.periodos}>
@@ -97,6 +177,7 @@ export default function ProgressoEntregas({ contagem }: { contagem: Contagem }) 
           </div>
         ))}
       </div>
+
     </div>
   );
 }

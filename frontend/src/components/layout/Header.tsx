@@ -8,23 +8,28 @@ import {
   Users, Trophy, Briefcase,
   User, Settings, ImageIcon,
   FileText, X,
-  CheckCheck, CircleSlash, Circle, CheckCircle2, Trash2, SquarePen, ChevronDown, ChevronUp,
-  CircleDashed, ListChecks,
+  CheckCheck, CircleSlash, Circle, Trash2, SquarePen, ChevronDown, ChevronUp,
+  CircleDashed, ListChecks, MailOpen, Mail, Check,
+  GraduationCap, Activity,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import MarqueeText from "@/components/ui/MarqueeText";
+import DragScroll from "@/components/ui/DragScroll";
 import { Usuario } from "@/types";
 import { signOut } from "@/hooks/useCurrentUser";
 import { initials } from "@/utils/format";
 import { CORES } from "@/utils/colors";
 import { NOTIFICACOES as NOTIFICATIONS, MENSAGENS as MESSAGES } from "@/data/inbox";
+import { useStatus, infoStatus } from "@/hooks/useStatus";
+import StatusPicker from "./StatusPicker";
 import styles from "./Header.module.css";
 
 interface Props {
   currentUser: Usuario;
 }
 
-const MENU_ITEMS = [
-  { label: "Perfil",        icon: User        },
+const MENU_ITEMS: { label: string; icon: LucideIcon; href?: string }[] = [
+  { label: "Perfil",        icon: User,       href: "/perfil" },
   { label: "Grupos",        icon: Users       },
   { label: "Trilhas",       icon: Trophy      },
   { label: "Fotos",         icon: ImageIcon   },
@@ -33,13 +38,59 @@ const MENU_ITEMS = [
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:18080/api/v1";
 
+/* ── Índice de busca das páginas acadêmicas (conteúdo estático do Boletim e do
+   painel Meu Desempenho) — permite achar disciplinas, notas e indicadores pela
+   busca da tab bar, junto com Posts e Vagas. ── */
+const INDICE_PAGINAS: { category: string; label: string; sub: string; href: string; termos: string }[] = [
+  // ── Boletim: disciplinas dos blocos ──
+  { category: "Boletim", label: "Fundamentos do Processamento de Dados", sub: "Bloco 1 · 25E1 · Aprovado · conceito DL", href: "/boletim", termos: "fundamentos processamento dados bloco 1 25e1 aprovado" },
+  { category: "Boletim", label: "Planejamento de Curso e Carreira",      sub: "Bloco 1 · 25E1 · não reprova por frequência", href: "/boletim", termos: "planejamento curso carreira frequencia isenta bloco 1" },
+  { category: "Boletim", label: "Projeto de Bloco: Processamento de Dados", sub: "Bloco 1 · 25E1 · PB · Aprovado", href: "/boletim", termos: "projeto bloco pb processamento dados aprovado" },
+  { category: "Boletim", label: "Conectividade e Desenvolvimento Front-End", sub: "Bloco 2 · 25E2 · Aprovado · 1 TP fora do prazo", href: "/boletim", termos: "conectividade front-end frontend bloco 2 25e2 tp atraso" },
+  { category: "Boletim", label: "Desenvolvimento Back-End",              sub: "Bloco 2 · 25E2 · Aprovado · conceito DL", href: "/boletim", termos: "desenvolvimento back-end backend bloco 2 25e2" },
+  { category: "Boletim", label: "Projeto de Bloco: Aplicações Conectadas", sub: "Bloco 2 · 25E2 · PB · Aprovado", href: "/boletim", termos: "projeto bloco pb aplicacoes conectadas aprovado" },
+  { category: "Boletim", label: "Análise e Segurança de Agentes de IA",  sub: "Bloco 3 · 26E2 · Cursando", href: "/boletim", termos: "analise seguranca agentes ia bloco 3 26e2 cursando" },
+  { category: "Boletim", label: "Engenharia Segura de Softwares Escaláveis", sub: "Bloco 3 · 26E2 · Cursando", href: "/boletim", termos: "engenharia segura softwares escalaveis bloco 3 26e2 cursando persistencia" },
+  { category: "Boletim", label: "Projeto de Bloco: Eng. de Softwares Escaláveis", sub: "Bloco 3 · 26E2 · PB · Cursando", href: "/boletim", termos: "projeto bloco pb engenharia softwares escalaveis cursando" },
+  { category: "Boletim", label: "Perfil de conceitos",                   sub: "DML · DL · D · ND — como cada conceito é atribuído", href: "/boletim", termos: "conceito conceitos dml dl d nd demonstrou louvor maximo rubrica competencia at" },
+  { category: "Boletim", label: "Como funciona a aprovação",             sub: "competências · 75% de presença · TPs no prazo · PB", href: "/boletim", termos: "aprovacao regras quesitos presenca 75 tp prazo projeto bloco reprovado" },
+  { category: "Boletim", label: "Boletim Acadêmico",                     sub: "histórico por competências e carga horária", href: "/boletim", termos: "boletim historico escolar competencias frequencia situacao blocos graduacao" },
+  // ── Boletim: trilhas de especialização ──
+  { category: "Boletim", label: "Trilha: Inteligência Artificial",  sub: "Machine Learning · Multi-Agentes IA", href: "/boletim", termos: "trilha inteligencia artificial machine learning multi-agentes ia" },
+  { category: "Boletim", label: "Trilha: Sistemas Complexos",       sub: "Engenharia Disciplinada de Softwares", href: "/boletim", termos: "trilha sistemas complexos engenharia disciplinada" },
+  { category: "Boletim", label: "Trilha: Engenharia de Dados",      sub: "Banco de Dados · Big Data", href: "/boletim", termos: "trilha engenharia dados big data banco" },
+  { category: "Boletim", label: "Trilha: Cibersegurança",           sub: "SOC e Blue Team · Red Team", href: "/boletim", termos: "trilha ciberseguranca seguranca soc blue red team ofensiva defensiva" },
+  { category: "Boletim", label: "Trilha: Cloud Computing",          sub: "Conteinerização · Arquitetura na Nuvem", href: "/boletim", termos: "trilha cloud computing conteinerizacao nuvem arquitetura" },
+  // ── Boletim: extensão, eletivas, estágio e complementares ──
+  { category: "Boletim", label: "Projetos Supervisionados de Extensão", sub: "400h necessárias · sem exigência de presença", href: "/boletim", termos: "projetos supervisionados extensao 400h carga sem presenca" },
+  { category: "Boletim", label: "Hackathon Social Infnet",             sub: "Extensão · 100h · 25E2 · Concluído", href: "/boletim", termos: "extensao hackathon social infnet concluido" },
+  { category: "Boletim", label: "Consultoria de TI para ONGs",         sub: "Extensão · 100h · 26E2 · Em curso", href: "/boletim", termos: "extensao consultoria ti ongs em curso" },
+  { category: "Boletim", label: "Disciplinas Eletivas",                sub: "exigem no mínimo 75% de presença", href: "/boletim", termos: "eletivas eletiva presenca 75 minimo" },
+  { category: "Boletim", label: "Introdução a Machine Learning",       sub: "Eletiva · 40h · 26E2 · Em curso", href: "/boletim", termos: "eletiva machine learning ia em curso" },
+  { category: "Boletim", label: "Estágio Obrigatório",                 sub: "400h necessárias · 220h concluídas", href: "/boletim", termos: "estagio obrigatorio 400h supervisionado" },
+  { category: "Boletim", label: "Atividades Complementares",           sub: "140h necessárias · 70h concluídas", href: "/boletim", termos: "atividades complementares 140h certificacao monitoria" },
+  { category: "Boletim", label: "Carga horária total",                 sub: "integralização do curso por categoria", href: "/boletim", termos: "carga horaria total integralizacao horas disciplinas extensao estagio complementares" },
+  // ── Meu Desempenho: indicadores do painel ──
+  // ── Perfil ──
+  { category: "Perfil", label: "Meu perfil", sub: "panorama do aluno, status e horas obrigatórias", href: "/perfil", termos: "perfil conta aluno panorama resumo status horas" },
+  { category: "Meu Desempenho", label: "Score geral no curso",      sub: "anéis de competências, presença e entregas", href: "/desempenho", termos: "score geral aneis competencias presenca entregas indice conceito medio" },
+  { category: "Meu Desempenho", label: "Conclusão do curso",        sub: "bloco 3 de 12 · 25%", href: "/desempenho", termos: "conclusao curso progresso blocos faltam formatura 12" },
+  { category: "Meu Desempenho", label: "Tendência do rendimento",   sub: "subindo ou caindo nas últimas semanas", href: "/desempenho", termos: "tendencia rendimento ponteiro subindo caindo evolucao" },
+  { category: "Meu Desempenho", label: "Evolução no semestre e projeção", sub: "você × turma + previsão dos próximos meses", href: "/desempenho", termos: "evolucao semestre projecao previsao futura media turma grafico linha" },
+  { category: "Meu Desempenho", label: "Comparação com turmas anteriores", sub: "índice médio de conceitos por turma", href: "/desempenho", termos: "comparacao turmas anteriores indice medio barras" },
+  { category: "Meu Desempenho", label: "Presenças por disciplina",  sub: "frequência do bloco atual · mínimo 75%", href: "/desempenho", termos: "presenca presencas frequencia faltas disciplinas 75" },
+  { category: "Meu Desempenho", label: "Horas complementares",      sub: "70h restantes de 140h", href: "/desempenho", termos: "horas complementares atividades 140 restantes" },
+  { category: "Meu Desempenho", label: "Horas de estágio",          sub: "180h restantes de 400h", href: "/desempenho", termos: "horas estagio obrigatorio 400 restantes" },
+  { category: "Meu Desempenho", label: "Horas de extensão",         sub: "100h restantes de 400h", href: "/desempenho", termos: "horas extensao projetos supervisionados 400 restantes" },
+];
+
 // notificações e mensagens vêm de @/data/inbox (fonte única compartilhada com a sidebar)
 
 /* ── Pasta de mensagens: contorno como UM path SVG único ──
    corpo + aba desenhados numa só forma (fill + stroke contínuos), gerada a
    partir da largura/altura reais do dock — assim o contorno acompanha o
    crescimento da lista sozinho, sem "duas peças". */
-const ABA_PEEK = 26; // altura da aba (agora acomoda o título "Mensagens")
+const ABA_PEEK = 34; // altura da aba — título em tamanho padrão, centralizado
 const PASTA_R  = 14; // raio dos cantos
 function pastaPath(w: number, h: number): string {
   const H = h + ABA_PEEK;   // altura total do SVG (inclui a aba)
@@ -50,12 +101,12 @@ function pastaPath(w: number, h: number): string {
     `L132 0`,                                    // topo reto da aba (mais larga)
     `C158 0 158 ${t} 186 ${t}`,                  // ombro: curva descendo ao corpo
     `L${w - PASTA_R} ${t}`,                      // borda superior do corpo
-    `Q${w} ${t} ${w} ${t + PASTA_R}`,            // canto superior-direito
-    `L${w} ${H - PASTA_R}`,                      // lateral direita
-    `Q${w} ${H} ${w - PASTA_R} ${H}`,            // canto inferior-direito
-    `L${PASTA_R} ${H}`,                          // base
-    `Q0 ${H} 0 ${H - PASTA_R}`,                  // canto inferior-esquerdo
-    "Z",                                         // fecha (lateral esquerda)
+    `Q${w} ${t} ${w} ${t + PASTA_R}`,            // canto superior-direito (arredondado)
+    // base RETA e encostada: o dock ancora na margem inferior, "fazendo parte"
+    // dela (não flutua) — cantos de baixo sem arredondar
+    `L${w} ${H}`,                                // lateral direita até a base
+    `L0 ${H}`,                                   // base
+    "Z",                                         // fecha subindo pela esquerda
   ].join(" ");
 }
 
@@ -81,11 +132,15 @@ export default function Header({ currentUser }: Props) {
 
   const cor        = CORES[currentUser.id % CORES.length];
   const myInitials = initials(currentUser.nome);
+  const statusAtual = useStatus();
 
   const [msgCollapsed, setMsgCollapsed] = useState(false);
 
   // dimensões reais do dock → path da pasta se ajusta ao crescer a lista
   const [pasta, setPasta] = useState({ w: 320, h: 240 });
+
+  // busca dentro das mensagens (nome ou texto)
+  const [buscaMsg, setBuscaMsg] = useState("");
 
   // popup de confirmação (excluir mensagens/notificações)
   const [confirmar, setConfirmar] = useState<{ texto: string; acao: () => void } | null>(null);
@@ -122,6 +177,16 @@ export default function Header({ currentUser }: Props) {
   });
   const todasMsgMarcadas = msgs.length > 0 && marcadasMsg.size === msgs.length;
   const marcarTodasMsg = () => { setSelMsg(true); setMarcadasMsg(todasMsgMarcadas ? new Set() : new Set(msgs.map(m => m.id))); };
+  // marcar como lida / não lida — o contador de não-lidas deriva do estado
+  const marcarLida = (id: number) =>
+    setMsgs(prev => prev.map(m => (m.id === id ? { ...m, unread: false } : m)));
+  const marcarNaoLida = (id: number) =>
+    setMsgs(prev => prev.map(m => (m.id === id ? { ...m, unread: true } : m)));
+  // em lote, sobre as selecionadas (modo seleção)
+  const lidasSelecionadas = () =>
+    setMsgs(prev => prev.map(m => (marcadasMsg.has(m.id) ? { ...m, unread: false } : m)));
+  const naoLidasSelecionadas = () =>
+    setMsgs(prev => prev.map(m => (marcadasMsg.has(m.id) ? { ...m, unread: true } : m)));
   const excluirMsgMarcadas = () => {
     if (marcadasMsg.size === 0) return;
     setConfirmar({
@@ -148,7 +213,7 @@ export default function Header({ currentUser }: Props) {
     const ro = new ResizeObserver(medir);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [msgOpen, msgCollapsed, msgs.length]);
+  }, [msgOpen, msgCollapsed, msgs.length, buscaMsg]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -235,6 +300,16 @@ export default function Header({ currentUser }: Props) {
             sub: v.empresa,
             href: `/vagas?q=${encodeURIComponent(q)}`,
           }));
+        // páginas acadêmicas (Boletim / Meu Desempenho) — índice estático local
+        INDICE_PAGINAS
+          .filter(p =>
+            p.label.toLowerCase().includes(q) ||
+            p.sub.toLowerCase().includes(q) ||
+            p.termos.includes(q)
+          )
+          .slice(0, 5)
+          .forEach(p => results.push({ category: p.category, label: p.label, sub: p.sub, href: p.href }));
+
         setSuggestions(results);
         setShowSugg(results.length > 0);
       } catch { setSuggestions([]); }
@@ -318,13 +393,17 @@ export default function Header({ currentUser }: Props) {
 
             {showSugg && suggestions.length > 0 && (
               <div className={styles.suggBox}>
-                {["Posts", "Vagas"].map(cat => {
+                {["Posts", "Vagas", "Perfil", "Boletim", "Meu Desempenho"].map(cat => {
                   const items = suggestions.filter(s => s.category === cat);
                   if (!items.length) return null;
+                  const CatIco = cat === "Posts" ? FileText
+                    : cat === "Vagas" ? Briefcase
+                    : cat === "Perfil" ? User
+                    : cat === "Boletim" ? GraduationCap : Activity;
                   return (
                     <div key={cat}>
                       <div className={styles.suggCat}>
-                        {cat === "Posts" ? <FileText size={11} /> : <Briefcase size={11} />} {cat}
+                        <CatIco size={11} /> {cat}
                       </div>
                       {items.map((s, i) => (
                         <button key={i} className={styles.suggItem} onMouseDown={() => handleSearchNav(s.href)}>
@@ -370,33 +449,53 @@ export default function Header({ currentUser }: Props) {
                 </svg>
                 {/* título dentro da abinha da pasta */}
                 <div className={styles.msgAba}>
-                  <MessageSquare size={13} className={styles.msgAbaIco} />
+                  <MessageSquare size={15} strokeWidth={2.6} className={styles.msgAbaIco} />
                   <span className={styles.msgAbaTitle}>Mensagens</span>
                 </div>
+                {/* plano superior (barra do avatar + busca) — flutua acima da
+                    lista, com sombra em cima e embaixo e uma folga separando */}
+                <div className={styles.msgPlano}>
                 {/* barra: avatar + nome · ações (flat) · janela recolher/fechar (carved) */}
                 <div className={styles.msgTab} onClick={() => msgCollapsed && setMsgCollapsed(false)}>
-                  <div className={styles.meuAvWrap}>
-                    <div className={styles.meuAv} style={{ background: cor }}>{myInitials}</div>
-                    <span className={styles.meuDot} title="Online" />
-                  </div>
-                  <span className={styles.meuNome}>{nomeCurto}</span>
+                  <div className={styles.meuAv} style={{ background: cor }} title={nomeCurto}>{myInitials}</div>
+                  <StatusPicker />
                   <div className={styles.msgTabActions}>
-                    <button className={`${styles.popIco} ${selMsg ? styles.popIcoOn : ""}`}
+                    {/* padrão: só Selecionar + Nova mensagem. No modo seleção
+                        abre o kit: marcar/desmarcar todas · lidas · não lidas
+                        · excluir (as três últimas exigem algo selecionado) */}
+                    <button className={`${styles.popIco} ${styles.msgBtnSel} ${selMsg ? styles.popIcoOn : ""}`}
                       title={selMsg ? "Cancelar seleção" : "Selecionar"}
                       onClick={e => { e.stopPropagation(); toggleSelMsg(); }}>
                       {selMsg ? <ListChecks size={15} /> : <CircleDashed size={15} />}
                     </button>
-                    <button className={styles.popIco} title={todasMsgMarcadas ? "Desmarcar todas" : "Marcar todas"}
-                      onClick={e => { e.stopPropagation(); marcarTodasMsg(); }}>
-                      {todasMsgMarcadas ? <CircleSlash size={15} /> : <CheckCheck size={15} />}
-                    </button>
-                    {marcadasMsg.size > 0 && (
-                      <button className={`${styles.popIco} ${styles.popIcoDanger}`} title="Excluir selecionadas"
-                        onClick={e => { e.stopPropagation(); excluirMsgMarcadas(); }}>
-                        <Trash2 size={15} />
-                      </button>
+                    {selMsg && (
+                      <>
+                        <button className={`${styles.popIco} ${todasMsgMarcadas ? styles.icoNeutro : styles.icoVerde}`}
+                          title={todasMsgMarcadas ? "Desmarcar todas" : "Marcar todas"}
+                          onClick={e => { e.stopPropagation(); marcarTodasMsg(); }}>
+                          {todasMsgMarcadas ? <CircleSlash size={15} /> : <CheckCheck size={15} />}
+                        </button>
+                        {marcadasMsg.size > 0 && (
+                          <>
+                            <button className={`${styles.popIco} ${styles.icoCiano}`} title="Marcar como lidas"
+                              onClick={e => { e.stopPropagation(); lidasSelecionadas(); }}>
+                              <MailOpen size={15} />
+                            </button>
+                            <button className={`${styles.popIco} ${styles.icoAmbar}`} title="Marcar como não lidas"
+                              onClick={e => { e.stopPropagation(); naoLidasSelecionadas(); }}>
+                              <Mail size={15} />
+                            </button>
+                            <button className={`${styles.popIco} ${styles.icoVermelho}`} title="Excluir selecionadas"
+                              onClick={e => { e.stopPropagation(); excluirMsgMarcadas(); }}>
+                              <Trash2 size={15} />
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
-                    <button className={styles.popIco} title="Nova mensagem" onClick={e => e.stopPropagation()}><SquarePen size={15} /></button>
+                    {!selMsg && (
+                      <button className={styles.popIco} title="Nova mensagem" onClick={e => e.stopPropagation()}><SquarePen size={15} /></button>
+                    )}
                   </div>
                   <div className={styles.msgTabWindow}>
                     <button className={styles.popIco} title={msgCollapsed ? "Expandir" : "Recolher"}
@@ -407,10 +506,33 @@ export default function Header({ currentUser }: Props) {
                       onClick={e => { e.stopPropagation(); setMsgOpen(false); }}><X size={15} /></button>
                   </div>
                 </div>
-                <div className={styles.msgList}>
-                  {msgs.length === 0 ? (
-                    <div className={styles.popVazio}>Nenhuma mensagem.</div>
-                  ) : msgs.map(m => {
+                {/* busca dentro das mensagens */}
+                <div className={styles.msgBusca}>
+                  <Search size={14} className={styles.msgBuscaIco} />
+                  <input
+                    className={styles.msgBuscaInput}
+                    placeholder="Buscar mensagens"
+                    value={buscaMsg}
+                    onChange={e => setBuscaMsg(e.target.value)}
+                    onClick={e => e.stopPropagation()}
+                  />
+                  {buscaMsg && (
+                    <button className={styles.msgBuscaClear} title="Limpar"
+                      onClick={e => { e.stopPropagation(); setBuscaMsg(""); }}>
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+                </div>
+                <DragScroll className={styles.msgList}>
+                  {(() => {
+                    const q = buscaMsg.trim().toLowerCase();
+                    const lista = q
+                      ? msgs.filter(m => m.nome.toLowerCase().includes(q) || m.texto.toLowerCase().includes(q))
+                      : msgs;
+                    if (msgs.length === 0) return <div className={styles.popVazio}>Nenhuma mensagem.</div>;
+                    if (lista.length === 0) return <div className={styles.popVazio}>Nada encontrado para “{buscaMsg}”.</div>;
+                    return lista.map(m => {
                     const msgCor = CORES[m.id % CORES.length];
                     const marc = marcadasMsg.has(m.id);
                     return (
@@ -418,7 +540,8 @@ export default function Header({ currentUser }: Props) {
                         {selMsg && (
                           <button className={`${styles.radar} ${marc ? styles.radarOn : ""}`}
                             onClick={() => toggleMarcaMsg(m.id)} title={marc ? "Desmarcar" : "Marcar"}>
-                            {marc ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                            <Circle size={20} />
+                            {marc && <Check size={13} className={styles.radarTick} />}
                           </button>
                         )}
                         <div className={styles.msgAv} style={{ background: msgCor }}>{initials(m.nome)}</div>
@@ -426,11 +549,26 @@ export default function Header({ currentUser }: Props) {
                           <span className={styles.msgNome}>{m.nome}</span>
                           <MarqueeText className={styles.msgTexto}>{m.texto}</MarqueeText>
                         </div>
-                        <span className={styles.msgTime}>{m.time}</span>
+                        <div className={styles.msgFim}>
+                          <span className={styles.msgTime}>{m.time}</span>
+                          {m.unread ? (
+                            <button className={styles.lidaBtn} title="Marcar como lida"
+                              onClick={() => marcarLida(m.id)}>
+                              <span className={styles.lidaDot} aria-hidden />
+                              <MailOpen size={13} />
+                            </button>
+                          ) : (
+                            <button className={`${styles.lidaBtn} ${styles.naoLidaBtn}`} title="Marcar como não lida"
+                              onClick={() => marcarNaoLida(m.id)}>
+                              <Mail size={13} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     );
-                  })}
-                </div>
+                    });
+                  })()}
+                </DragScroll>
               </div>,
               document.body
             )}
@@ -456,13 +594,18 @@ export default function Header({ currentUser }: Props) {
                       title={selNotif ? "Cancelar seleção" : "Selecionar"} onClick={toggleSelNotif}>
                       {selNotif ? <ListChecks size={15} /> : <CircleDashed size={15} />}
                     </button>
-                    <button className={styles.popIco} title={todasMarcadas ? "Desmarcar todas" : "Marcar todas"} onClick={marcarTodas}>
-                      {todasMarcadas ? <CircleSlash size={15} /> : <CheckCheck size={15} />}
-                    </button>
-                    {marcadas.size > 0 && (
-                      <button className={`${styles.popIco} ${styles.popIcoDanger}`} title="Excluir selecionadas" onClick={excluirMarcadas}>
-                        <Trash2 size={15} />
-                      </button>
+                    {selNotif && (
+                      <>
+                        <button className={`${styles.popIco} ${todasMarcadas ? styles.icoNeutro : styles.icoVerde}`}
+                          title={todasMarcadas ? "Desmarcar todas" : "Marcar todas"} onClick={marcarTodas}>
+                          {todasMarcadas ? <CircleSlash size={15} /> : <CheckCheck size={15} />}
+                        </button>
+                        {marcadas.size > 0 && (
+                          <button className={`${styles.popIco} ${styles.icoVermelho}`} title="Excluir selecionadas" onClick={excluirMarcadas}>
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -476,7 +619,8 @@ export default function Header({ currentUser }: Props) {
                       {selNotif && (
                         <button className={`${styles.radar} ${marc ? styles.radarOn : ""}`} onClick={() => toggleMarca(n.id)}
                           title={marc ? "Desmarcar" : "Marcar"} aria-label={marc ? "Desmarcar" : "Marcar"}>
-                          {marc ? <CheckCircle2 size={22} /> : <Circle size={22} />}
+                          <Circle size={22} />
+                          {marc && <Check size={14} className={styles.radarTick} />}
                         </button>
                       )}
                       <div className={styles.notifIconWrap}><NIcon size={14} /></div>
@@ -499,7 +643,8 @@ export default function Header({ currentUser }: Props) {
             >
               <div className={styles.avatarContainer}>
                 <div className={styles.avatar} style={{ background: cor }}>{myInitials}</div>
-                <span className={styles.onlineDot} />
+                <span className={styles.onlineDot} data-status={statusAtual}
+                  style={{ background: infoStatus(statusAtual).cor }} title={infoStatus(statusAtual).label} />
               </div>
             </button>
 
@@ -510,10 +655,12 @@ export default function Header({ currentUser }: Props) {
                   <div className={styles.dropName}>{currentUser.nome}</div>
                   <div className={styles.dropPapel}>{currentUser.papelDescricao}</div>
                   <div className={styles.dropEmail}>{currentUser.email}</div>
+                  <div className={styles.dropStatus}><StatusPicker /></div>
                 </div>
                 <div className={styles.dropDivider} />
-                {MENU_ITEMS.map(({ label, icon: Icon }) => (
-                  <button key={label} className={styles.dropItem} onClick={() => setMenuOpen(false)}>
+                {MENU_ITEMS.map(({ label, icon: Icon, href }) => (
+                  <button key={label} className={styles.dropItem}
+                    onClick={() => { setMenuOpen(false); if (href) router.push(href); }}>
                     <Icon size={14} />{label}
                   </button>
                 ))}

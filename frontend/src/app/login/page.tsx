@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Trophy, Briefcase, LogIn } from "lucide-react";
+import { ArrowRight, TriangleAlert, Check, LoaderCircle } from "lucide-react";
 import { usuarioService } from "@/services/usuarioService";
 import HexLogo from "@/components/ui/HexLogo";
 import { Usuario } from "@/types";
 import { initials } from "@/utils/format";
 import styles from "./page.module.css";
+
+const CORES = ["#3b82f6", "#7c3aed", "#e63946", "#2a9d8f", "#f59e0b"];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,8 +17,14 @@ export default function LoginPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [entrando, setEntrando] = useState(false);
-  const [saindo, setSaindo] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // origem da abertura circular: o centro do botão que foi acionado
+  const [veu, setVeu] = useState<{ x: number; y: number } | null>(null);
+  // sombreado das bordas da lista, conforme o que ainda há para rolar
+  const [borda, setBorda] = useState<"none" | "baixo" | "ambos" | "cima">("none");
+
+  const listaRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     router.prefetch("/feed");
@@ -26,88 +34,138 @@ export default function LoginPage() {
       .finally(() => setLoading(false));
   }, [router]);
 
-  const handleEntrar = () => {
+  /* a lista só ganha esmaecimento no lado em que ainda há conteúdo escondido —
+     sem isso a última linha fica cortada no meio, como se estivesse quebrada */
+  const medirBorda = useCallback(() => {
+    const el = listaRef.current;
+    if (!el) return;
+    const sobra = el.scrollHeight - el.clientHeight;
+    if (sobra <= 1) return setBorda("none");
+    const noTopo = el.scrollTop <= 1;
+    const naBase = el.scrollTop >= sobra - 1;
+    setBorda(noTopo ? "baixo" : naBase ? "cima" : "ambos");
+  }, []);
+
+  useEffect(() => { medirBorda(); }, [usuarios, medirBorda]);
+
+  const entrar = useCallback(() => {
     const user = usuarios.find(u => u.id === selected);
-    if (!user) return;
+    if (!user || entrando) return;
     setEntrando(true);
     localStorage.setItem("infnet_user", JSON.stringify(user));
-    // "mergulho": a página se aproxima e dissolve antes de navegar — emenda
-    // com a animação de entrada do hub, como se atravessasse a tela.
-    setSaindo(true);
-    setTimeout(() => router.push("/feed"), 420);
+    // abertura circular a partir do botão: o hub "nasce" de onde você clicou
+    const r = btnRef.current?.getBoundingClientRect();
+    setVeu(r
+      ? { x: r.left + r.width / 2, y: r.top + r.height / 2 }
+      : { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    setTimeout(() => router.push("/feed"), 430);
+  }, [usuarios, selected, entrando, router]);
+
+  /* teclado: setas percorrem os perfis, Enter entra */
+  const navegar = (e: React.KeyboardEvent) => {
+    if (!usuarios.length) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const i = usuarios.findIndex(u => u.id === selected);
+      const prox = e.key === "ArrowDown"
+        ? (i + 1) % usuarios.length
+        : (i <= 0 ? usuarios.length - 1 : i - 1);
+      setSelected(usuarios[prox].id);
+      listaRef.current?.children[prox]?.scrollIntoView({ block: "nearest" });
+    }
+    if (e.key === "Enter" && selected != null) { e.preventDefault(); entrar(); }
   };
 
-  const CORES = ["#3b82f6", "#7c3aed", "#e63946", "#2a9d8f", "#f59e0b"];
-
   return (
-    <div className={`${styles.page} ${saindo ? styles.pageSaindo : ""}`}>
-      <div className={styles.card}>
-        <div className={styles.brand}>
-          <div className={styles.brandBg} />
-          <div className={styles.brandOverlay} />
-          <div className={styles.brandContent}>
-            <div className={styles.logo}>
-              <HexLogo size={60} id="hexGradLogin" />
-              <span className={styles.logoText}>Infnet<b>Hub</b></span>
-            </div>
+    <div className={styles.page}>
+      <div className={styles.luz} aria-hidden />
 
-            <div className={styles.brandFooter}>
-              <p className={styles.tagline}>A plataforma dos estudantes Infnet!</p>
-              <ul className={styles.features}>
-                <li><span className={styles.featureIcon}><LayoutDashboard size={15} /></span> Feed de atualizações</li>
-                <li><span className={styles.featureIcon}><Users size={15} /></span> Grupos e disciplinas</li>
-                <li><span className={styles.featureIcon}><Trophy size={15} /></span> Trilhas de aprendizagem</li>
-                <li><span className={styles.featureIcon}><Briefcase size={15} /></span> Vagas e oportunidades</li>
-              </ul>
-            </div>
-          </div>
+      <main className={`${styles.coluna} ${entrando ? styles.recuando : ""}`}>
+        <div className={styles.marca}>
+          <HexLogo size={38} id="hexGradLogin" />
+          <span className={styles.marcaTxt}>Infnet<b>Hub</b></span>
         </div>
 
-        <div className={styles.form}>
-          <h1 className={styles.title}>Bem-vindo(a) de volta!</h1>
-          <p className={styles.subtitle}>Selecione seu perfil para continuar</p>
+        <section className={styles.card}>
+          <header className={styles.cabecalho}>
+            <h1 className={styles.titulo}>Entrar</h1>
+            <p className={styles.sub}>Escolha seu perfil para continuar.</p>
+          </header>
 
-          {error && <div className={styles.error}>⚠️ {error}</div>}
+          {error && (
+            <div className={styles.erro} role="alert">
+              <TriangleAlert size={18} className={styles.erroIco} />
+              <span>{error}</span>
+            </div>
+          )}
 
           {loading ? (
-            <div className={styles.loading}>
-              {[...Array(3)].map((_, i) => <div key={i} className={styles.skeleton} />)}
+            <div className={styles.lista}>
+              {[...Array(4)].map((_, i) => <div key={i} className={styles.skeleton} />)}
             </div>
           ) : (
-            <div className={styles.userList}>
-              {usuarios.map(u => (
-                <button
-                  key={u.id}
-                  className={`${styles.userCard} ${selected === u.id ? styles.userCardSelected : ""}`}
-                  onClick={() => setSelected(u.id)}
-                >
-                  <div
-                    className={styles.avatar}
-                    style={{ background: CORES[u.id % CORES.length] }}
+            <div
+              ref={listaRef}
+              className={styles.lista}
+              data-borda={borda}
+              onScroll={medirBorda}
+              onKeyDown={navegar}
+              role="radiogroup"
+              aria-label="Perfis disponíveis"
+            >
+              {usuarios.map(u => {
+                const ativo = selected === u.id;
+                return (
+                  <button
+                    key={u.id}
+                    role="radio"
+                    aria-checked={ativo}
+                    tabIndex={ativo || (selected == null && u.id === usuarios[0].id) ? 0 : -1}
+                    className={`${styles.perfil} ${ativo ? styles.perfilOn : ""}`}
+                    onClick={() => setSelected(u.id)}
+                    onDoubleClick={entrar}
                   >
-                    {initials(u.nome)}
-                  </div>
-                  <div className={styles.userInfo}>
-                    <span className={styles.userName}>{u.nome}</span>
-                    <span className={styles.userMeta}>
-                      {u.classe ? `${u.classe} · ` : ""}{u.escola ?? "Infnet"}
+                    <span className={styles.avatar} style={{ background: CORES[u.id % CORES.length] }}>
+                      {initials(u.nome)}
                     </span>
-                  </div>
-                  {selected === u.id && <span className={styles.check}>✓</span>}
-                </button>
-              ))}
+                    <span className={styles.info}>
+                      <span className={styles.nome}>{u.nome}</span>
+                      <span className={styles.meta}>
+                        {u.classe ? `${u.classe} · ` : ""}{u.escola ?? "Infnet"}
+                      </span>
+                    </span>
+                    <span className={styles.marcador} aria-hidden>
+                      {ativo && <Check size={12} strokeWidth={3.2} />}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
 
           <button
-            className={styles.btnEntrar}
-            onClick={handleEntrar}
+            ref={btnRef}
+            className={styles.btn}
+            onClick={entrar}
             disabled={!selected || entrando}
           >
-            {entrando ? "Entrando..." : <><LogIn size={18} /> Entrar</>}
+            {entrando
+              ? <><LoaderCircle size={16} className={styles.girando} /> Entrando…</>
+              : <>Continuar <ArrowRight size={16} className={styles.seta} /></>}
           </button>
-        </div>
-      </div>
+        </section>
+
+        <p className={styles.rodape}>Ambiente de demonstração acadêmica · Infnet</p>
+      </main>
+
+      {/* abertura circular que cobre a tela e entrega a vez para o hub */}
+      {veu && (
+        <div
+          className={styles.veu}
+          style={{ ["--vx" as string]: `${veu.x}px`, ["--vy" as string]: `${veu.y}px` }}
+          aria-hidden
+        />
+      )}
     </div>
   );
 }

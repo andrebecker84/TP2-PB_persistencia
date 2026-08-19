@@ -1,0 +1,150 @@
+.wrap { position: relative; display: inline-flex; }
+
+/* ── Badge (sem contorno, cor definida por --stcor) ── */
+.badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .1rem .35rem; border: none; background: none; cursor: pointer;
+  font-size: .74rem; font-weight: 700; letter-spacing: .01em;
+  color: var(--stcor); border-radius: 99px;
+  transition: background .15s;
+}
+.badge:hover { background: color-mix(in srgb, var(--stcor) 16%, transparent); }
+.compacto { padding: .2rem; }
+
+/* --stcor: a cor do sinal · --stluz: o halo, uma versão mais clara e
+   translúcida da mesma cor — é ela que pulsa, para o brilho não estourar */
+.online   { --stcor: #22c55e; --stluz: rgba(110,231,150,.5); }
+.ausente  { --stcor: #f59e0b; --stluz: rgba(253,205,110,.48); }
+.ocupado  { --stcor: #ef4444; --stluz: rgba(252,150,150,.48); }
+.dormindo { --stcor: #a78bfa; --stluz: rgba(206,193,253,.48); }
+.offline  { --stcor: #94a3b8; --stluz: rgba(148,163,184,.3); }
+
+/* ── A luz ── */
+.luz {
+  position: relative; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--stcor); flex-shrink: 0; box-shadow: 0 0 6px var(--stluz);
+}
+
+/* online: acende, a onda se abre, apaga — ciclo contínuo e sem emenda */
+.online .luz { animation: pulso 2.2s ease-in-out infinite; }
+.online .luz::after {
+  content: ''; position: absolute; inset: -1px; border-radius: 50%;
+  border: 1px solid var(--stcor); animation: onda 2.2s ease-out infinite;
+}
+@keyframes pulso {
+  0%   { opacity: .15; box-shadow: 0 0 0 var(--stcor); }
+  15%  { opacity: 1;   box-shadow: 0 0 11px var(--stcor); }
+  60%  { opacity: 1;   box-shadow: 0 0 8px var(--stcor); }
+  100% { opacity: .15; box-shadow: 0 0 0 var(--stcor); }
+}
+@keyframes onda {
+  0%   { transform: scale(1);    opacity: 0; }
+  15%  { transform: scale(1.05); opacity: .55; }
+  100% { transform: scale(3.2);  opacity: 0; }
+}
+
+/* ausente: respiração lenta e larga — a luz incha e recolhe, com uma onda
+   preguiçosa saindo junto (bem mais devagar que a do online) */
+.ausente .luz { animation: respira 3s ease-in-out infinite; }
+.ausente .luz::after {
+  content: ''; position: absolute; inset: -1px; border-radius: 50%;
+  border: 1.5px solid var(--stcor); animation: respiraOnda 3s ease-in-out infinite;
+}
+@keyframes respira {
+  0%, 100% { transform: scale(.9);  opacity: .5; box-shadow: 0 0 3px var(--stcor); }
+  50%      { transform: scale(1.4); opacity: 1;  box-shadow: 0 0 13px 2px var(--stcor); }
+}
+@keyframes respiraOnda {
+  0%, 100% { transform: scale(1);   opacity: .55; }
+  50%      { transform: scale(2.4); opacity: 0; }
+}
+
+/* ocupado: só a bolinha vermelha, batendo como um coração (duas pancadas
+   fortes e uma pausa) — cresce e acende junto, para a batida ficar visível */
+.ocupado .luz { animation: batida 2s ease-out infinite; }
+.ocupado .luz::after {
+  content: ''; position: absolute; inset: -1px; border-radius: 50%;
+  border: 1.5px solid var(--stcor); animation: batidaOnda 2s ease-out infinite;
+}
+@keyframes batida {
+  0%          { transform: scale(1);    box-shadow: 0 0 4px var(--stcor); }
+  10%         { transform: scale(1.45); box-shadow: 0 0 14px 2px var(--stcor); }
+  20%         { transform: scale(1);    box-shadow: 0 0 4px var(--stcor); }
+  30%         { transform: scale(1.32); box-shadow: 0 0 11px 1px var(--stcor); }
+  42%, 100%   { transform: scale(1);    box-shadow: 0 0 4px var(--stcor); }
+}
+@keyframes batidaOnda {
+  0%        { transform: scale(1);   opacity: .7; }
+  38%       { transform: scale(2.6); opacity: 0; }
+  100%      { transform: scale(2.6); opacity: 0; }
+}
+
+/* offline: só o contorno, sem brilho e sem animação */
+.offline .luz { background: none; box-shadow: none; border: 1.6px solid var(--stcor); opacity: .85; }
+
+/* ── Dormindo: bonequinho roncando ── */
+.dorminhoco { overflow: visible; flex-shrink: 0; color: var(--stcor); }
+.travesseiro { fill: currentColor; opacity: .22; }
+.cabeca { fill: currentColor; }
+.olho, .boca { fill: none; stroke: rgba(8,10,30,.8); stroke-width: 1.1; stroke-linecap: round; }
+.boca { stroke-width: .9; opacity: .7; }
+.bochecha { fill: rgba(255,140,175,.55); }
+/* o ronco: infla devagar e solta */
+.corpo {
+  transform-box: view-box; transform-origin: 8px 13.5px;
+  animation: ronco 3.2s ease-in-out infinite;
+}
+@keyframes ronco {
+  0%, 100% { transform: scale(1); }
+  42%      { transform: scale(1.09); }
+  62%      { transform: scale(.99); }
+}
+.zs { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.z1, .z2 { transform-box: view-box; transform-origin: 18px 9px; }
+.z1 { animation: sobeZ 3.2s ease-out infinite; }
+.z2 { animation: sobeZ 3.2s ease-out infinite .55s; transform-origin: 21px 6px; }
+@keyframes sobeZ {
+  0%   { opacity: 0; transform: translate(0, 3px) scale(.55); }
+  25%  { opacity: 1; transform: translate(1px, 0) scale(1); }
+  100% { opacity: 0; transform: translate(3.5px, -5px) scale(1.15); }
+}
+
+/* ── Menu ── */
+/* vai por portal para o <body>: posição fixa, calculada a partir do botão */
+.menu {
+  position: fixed; z-index: 9700;
+  width: 232px; padding: .35rem;
+  background: color-mix(in srgb, var(--surface) 97%, transparent);
+  border: 1px solid var(--border-2); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 1px;
+  animation: abre .16s cubic-bezier(.34,1.3,.64,1);
+}
+@keyframes abre { from { opacity: 0; transform: translateY(-5px) scale(.97); } }
+/* no dock (ancorado na base da página) o menu abre para CIMA */
+.menuCima { animation: abreCima .16s cubic-bezier(.34,1.3,.64,1); }
+@keyframes abreCima { from { opacity: 0; transform: translateY(5px) scale(.97); } }
+
+/* o optLuz precisa caber o bonequinho, que é maior que uma bolinha */
+.optLuz { min-height: 26px; }
+.menuTitulo {
+  font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-muted); padding: .35rem .5rem .3rem;
+}
+.opt {
+  display: flex; align-items: center; gap: .55rem; width: 100%;
+  padding: .42rem .5rem; border: none; background: none; cursor: pointer;
+  border-radius: var(--radius); text-align: left;
+  transition: background .13s;
+}
+.opt:hover { background: color-mix(in srgb, var(--stcor) 12%, transparent); }
+.optOn { background: color-mix(in srgb, var(--stcor) 15%, transparent); }
+.optLuz { width: 30px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.optTxt { display: flex; flex-direction: column; min-width: 0; }
+.optTxt b { font-size: .78rem; font-weight: 700; color: var(--text); }
+.optTxt i { font-style: normal; font-size: .66rem; color: var(--text-muted); }
+.optCheck { margin-left: auto; color: var(--stcor); flex-shrink: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .luz, .luz::after, .corpo, .z1, .z2 { animation: none !important; }
+}

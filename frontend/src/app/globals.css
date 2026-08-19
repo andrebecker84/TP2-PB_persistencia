@@ -1,7 +1,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #040c1a;
+  --bg:        #030a16;
   --surface:   #091526;
   --surface-2: #0d1e35;
   --surface-3: #122545;
@@ -103,14 +103,21 @@ html {
   background: var(--bg);
 }
 body {
-  background: var(--bg-glow), var(--bg);
-  background-attachment: fixed;
+  background: transparent;
   color: var(--text);
   font-family: var(--font-sans), 'Segoe UI', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100%;
+}
+/* Brilho do topo numa camada FIXA própria: pintada uma vez e apenas composta
+   no scroll. O background-attachment: fixed que ficava no body repintava o
+   fundo da página inteira a cada frame de rolagem — jank, agravado pelos
+   vidros com backdrop-filter por cima. O html segue com var(--bg) sólido. */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--bg-glow);
 }
 
 button { cursor: pointer; font-family: inherit; border: none; background: none; color: inherit;
@@ -159,4 +166,56 @@ a:hover { text-decoration: underline; }
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Impressão ─────────────────────────────────────────────────────────────
+   No papel a página sai sempre em tema claro (tinta escura sobre branco), mas
+   COM os elementos gráficos: por padrão o navegador descarta fundos, gradientes
+   e barras de progresso — print-color-adjust: exact impede isso. */
+@media print {
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    backdrop-filter: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  :root, [data-theme="dark"], [data-theme="light"] {
+    --bg:        #ffffff;
+    --surface:   #ffffff;
+    --surface-2: #f4f6fa;
+    --surface-3: #e9edf5;
+    --border:    rgba(12, 24, 68, .18);
+    --border-2:  rgba(12, 24, 68, .30);
+
+    --primary:       #0a66c2;
+    --primary-hover: #004182;
+    --primary-dim:   rgba(10, 102, 194, .10);
+    --primary-glow:  rgba(10, 102, 194, .18);
+
+    --accent:  #0e7490;
+    --success: #15803d;
+    --warning: #a16207;
+    --danger:  #b91c1c;
+
+    --text:      #0b1020;
+    --text-dim:  #26324d;
+    --text-muted:#5a6884;
+
+    --bg-glow: none;
+    --gradient:         linear-gradient(135deg, #0a66c2, #0e7490);
+    --gradient-surface: rgba(10, 102, 194, .06);
+
+    --edge:         0 0 0 0 transparent;
+    --glass-bg:     #ffffff;
+    --glass-border: rgba(12, 24, 68, .18);
+    --glass-blur:   none;
+    --shadow: none; --shadow-lg: none; --glow: none;
+    --header-bg: #ffffff;
+    --icon-bg:   linear-gradient(135deg, #0a66c2, #0e7490);
+  }
+
+  html, body { background: #fff !important; color: var(--text); }
+  @page { margin: 14mm; }
 }

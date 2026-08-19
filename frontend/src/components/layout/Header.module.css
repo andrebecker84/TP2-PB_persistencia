@@ -139,25 +139,30 @@
 .searchInput {
   width: 100%; height: 38px;
   caret-color: var(--accent);
-  background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+  /* mesma receita de vidro do resto (surface tingido, não o branco que
+     destoava): fio de luz sutil no topo + superfície translúcida escura */
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.05), transparent 46%),
+    color-mix(in srgb, var(--surface-2) 80%, transparent);
   border: 1px solid var(--border-2);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
   border-radius: var(--pill); padding: .35rem 6.5rem .35rem 3rem;
   color: var(--text); font-size: .85rem;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.14),
-    inset 0 -1px 2px rgba(0,0,0,.25),
-    0 0 12px rgba(34,211,238,.14);
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -1px 2px rgba(0,0,0,.28),
+    0 0 10px rgba(59,142,245,.1);
   transition: box-shadow .25s ease, border-color .25s ease;
 }
-.searchInput:hover { border-color: rgba(34,211,238,.4); }
+.searchInput:hover { border-color: rgba(59,142,245,.4); }
 .searchInput:focus {
   outline: none;
-  border-color: rgba(34,211,238,.55);
+  border-color: var(--primary);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.18),
-    inset 0 -1px 2px rgba(0,0,0,.25),
-    0 0 22px rgba(34,211,238,.38);
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 2px rgba(0,0,0,.28),
+    0 0 0 3px var(--primary-dim),
+    0 0 18px rgba(59,142,245,.28);
 }
 .searchInput::placeholder { color: var(--text-muted); letter-spacing: .02em; font-size: .82rem; }
 /* enquanto vazio, o cursor nativo do navegador não compete com o caret decorativo:
@@ -456,12 +461,27 @@
   font-size: .68rem; font-weight: 700; color: #fff;
   box-shadow: 0 0 0 2px rgba(59,142,245,.4);
 }
+/* bolinha de presença no avatar — a cor vem do status escolhido (useStatus) */
 .onlineDot {
   position: absolute; bottom: -2px; right: -2px;
   width: 10px; height: 10px; border-radius: 50%;
   background: #22c55e;
   border: 2px solid rgba(4,12,26,.96);
+  transition: background .25s;
 }
+.onlineDot[data-status="online"]   { animation: dotPulso 2.2s ease-in-out infinite; }
+.onlineDot[data-status="ausente"]  { animation: dotRespira 3.6s ease-in-out infinite; }
+.onlineDot[data-status="dormindo"] { animation: dotRespira 3.2s ease-in-out infinite; }
+.onlineDot[data-status="offline"]  { opacity: .8; }
+@keyframes dotPulso {
+  0%, 100% { box-shadow: 0 0 0 rgba(34,197,94,0); }
+  15%      { box-shadow: 0 0 9px 1px rgba(34,197,94,.85); }
+  60%      { box-shadow: 0 0 5px rgba(34,197,94,.5); }
+}
+@keyframes dotRespira { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+
+/* seletor de status dentro do menu do perfil */
+.dropStatus { margin-top: .45rem; display: flex; justify-content: center; }
 .avatarName {
   font-size: .8125rem; font-weight: 600; color: var(--text-dim);
   max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -540,33 +560,32 @@
   color: var(--text-muted); background: none; cursor: pointer;
   transition: color .15s, transform .15s, background .15s;
 }
+.radar { position: relative; }
 .radar svg { width: 22px; height: 22px; }
 .radar:hover { color: var(--primary); transform: scale(1.1); background: var(--surface-2); }
-.radarOn { color: var(--success); }
-.radarOn:hover { color: var(--success); }
-.radarOn svg { filter: drop-shadow(0 0 5px rgba(34,197,94,.6)); }
+/* selecionado: o CONTORNO (anel) fica neutro — apenas o TICK é verde */
+.radarOn { color: var(--text-dim); }
+.radar .radarTick {
+  position: absolute; inset: 0; margin: auto;
+  width: 13px; height: 13px; color: var(--success);
+  filter: drop-shadow(0 0 4px rgba(34,197,94,.55)); stroke-width: 3;
+}
 .notifItem.marcada {
-  background: rgba(34,197,94,.09); box-shadow: inset 3px 0 0 var(--success);
+  background: rgba(34,197,94,.07); box-shadow: inset 2px 0 0 rgba(34,197,94,.6);
 }
 
 /* meu avatar + status no cabeçalho das mensagens (não junto da lista) */
 .meuStatus { display: flex; align-items: center; gap: .55rem; min-width: 0; }
-.meuAvWrap { position: relative; flex-shrink: 0; }
+/* avatar SEM contorno, só um leve efeito de luz (brilho interno + halo suave) */
 .meuAv {
-  width: 26px; height: 26px; border-radius: 50%;
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: .64rem; font-weight: 600; color: #fff;
-  box-shadow: 0 0 0 2px var(--surface);
+  font-size: .7rem; font-weight: 700; color: #fff;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,.45),
+    inset 0 -2px 3px rgba(0,0,0,.25),
+    0 0 10px rgba(255,255,255,.14);
 }
-.meuDot {
-  position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px;
-  border-radius: 50%; background: var(--success);
-  box-shadow: 0 0 0 2px var(--surface), 0 0 6px rgba(34,197,94,.6);
-}
-.meuInfo { display: flex; flex-direction: column; min-width: 0; }
-.meuNome { font-size: .8rem; font-weight: 400; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* status apenas em texto: a bolinha já está no avatar (.meuDot) */
-.meuOnline { font-size: .7rem; font-weight: 600; color: var(--success); }
 
 /* divisórias entre mensagens */
 .msgList .msgItem { border-bottom: 1px solid var(--border); }
@@ -574,7 +593,9 @@
 
 /* ── Dock de mensagens: PASTA DE ARQUIVO (fundo escuro + frente clara) ── */
 .msgDock {
-  position: fixed; bottom: 16px; right: 16px; top: auto; left: auto; z-index: 400;
+  /* ancorado na MARGEM INFERIOR (bottom: 0) — faz parte da borda da página,
+     não flutua; os cantos de baixo do path são retos pelo mesmo motivo */
+  position: fixed; bottom: 0; right: 16px; top: auto; left: auto; z-index: 400;
   width: 344px; max-height: 560px;
   display: flex; flex-direction: column; overflow: visible;
   /* fundo, borda e sombra da pasta são desenhados pelo SVG (.pastaSvg);
@@ -586,26 +607,29 @@
    1) vidro: div com backdrop-filter recortado no path = glassmorphism real;
    2) contorno: SVG só com o stroke por cima. A sombra/glow seguem a forma. */
 .pastaGlass {
-  position: absolute; top: -26px; left: 0; z-index: 0; pointer-events: none;
+  /* top = -ABA_PEEK (34px, Header.tsx) — vidro, SVG e caixa do título
+     precisam partir do MESMO y, senão o título desalinha dentro da aba */
+  position: absolute; top: -34px; left: 0; z-index: 0; pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(59,142,245,.13), transparent 72px),
+    linear-gradient(180deg, rgba(59,142,245,.13), transparent 80px),
     linear-gradient(160deg, rgba(255,255,255,.06), transparent 45%),
-    color-mix(in srgb, var(--surface) 68%, transparent);
+    color-mix(in srgb, var(--surface) 60%, transparent);
   /* SÓ backdrop-filter aqui: um `filter` no MESMO elemento faz o Chrome
      descartar o backdrop-filter (o vidro some). A sombra vai no SVG.
      Sem a linha -webkit-*: ela fazia o Lightning CSS (build) descartar tudo.
-     Preenchimento a 68% → o blur aparece de leve (glass sutil). */
+     Preenchimento a 60% → o blur atravessa um pouco mais (glass presente,
+     ainda discreto). */
   backdrop-filter: blur(26px) saturate(1.5);
 }
 :global([data-theme="light"]) .pastaGlass {
   background:
-    linear-gradient(180deg, rgba(10,102,194,.09), transparent 72px),
+    linear-gradient(180deg, rgba(10,102,194,.09), transparent 80px),
     linear-gradient(160deg, rgba(255,255,255,.6), transparent 45%),
-    color-mix(in srgb, var(--surface) 55%, transparent);
+    color-mix(in srgb, var(--surface) 48%, transparent);
 }
 /* contorno + sombra/glow da pasta (segue a forma; filter aqui não afeta o vidro) */
 .pastaSvg {
-  position: absolute; top: -26px; left: 0; z-index: 0;
+  position: absolute; top: -34px; left: 0; z-index: 0;
   overflow: visible; pointer-events: none;
   filter: drop-shadow(0 15px 26px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(59,142,245,.12));
 }
@@ -613,45 +637,83 @@
   filter: drop-shadow(0 12px 24px rgba(10,20,60,.18));
 }
 .pastaStroke { fill: none; stroke: var(--border-2); stroke-width: 1; }
-/* conteúdo acima do SVG */
-.msgDock > .msgAba,
-.msgDock > .msgTab,
+/* conteúdo acima do SVG — a .msgAba fica de FORA desta lista: ela é
+   position:absolute (ancorada na aba, fora do fluxo) e esta regra, mais
+   específica, a rebaixava para relative — virava item do flex, ocupava
+   espaço no fluxo (o vão em branco sob a aba) e ainda encolhia. */
 .msgDock > .msgList { position: relative; z-index: 1; }
+/* o plano superior fica ACIMA da lista: além da sombra que ele projeta nos
+   cartões, é dele que sai o menu de status, que não pode ficar por baixo */
+.msgDock > .msgPlano { position: relative; z-index: 5; }
+
+/* plano superior: barra do avatar + busca como uma peça ERGUIDA acima da
+   lista — fio de luz no lábio de cima (pega a luz), sombra descendo sobre as
+   mensagens e uma folga separando os dois planos */
+.msgPlano {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  margin-bottom: .55rem; /* folga entre o plano e a lista */
+  /* sombra DIFUSA descendo sobre a lista — spread bem negativo + blur alto para
+     ser um esfumado suave, nunca uma linha marcada sob o título */
+  box-shadow: 0 14px 22px -18px rgba(0,0,0,.45);
+}
+:global([data-theme="light"]) .msgPlano {
+  box-shadow: 0 14px 22px -18px rgba(10,20,60,.22);
+}
 @keyframes dockUp { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
 
-/* TÍTULO dentro da abinha: centralizado na aba (não grudado no topo) e com o
-   MESMO efeito cravejado dos botões da janela — porém na fonte e no ícone
-   (sombra escura em cima + luz embaixo = texto entalhado na aba). */
+/* TÍTULO dentro da abinha: tamanho PADRÃO dos títulos de painel (.9rem/700,
+   como "Tarefas & Entregas"), centralizado na altura da aba (34px) e com o
+   mesmo efeito cravejado dos botões da janela — na fonte e no ícone
+   (sombra escura em cima + fio de luz embaixo = entalhado na aba). */
 .msgAba {
-  position: absolute; top: -26px; left: 0; z-index: 1;
-  height: 26px; width: 186px;
-  display: flex; align-items: center; gap: .4rem;
-  padding: 0 .5rem 0 .85rem; pointer-events: none;
+  position: absolute; top: -34px; left: 0; z-index: 1;
+  height: 34px; width: 186px;
+  display: flex; align-items: center; gap: .45rem;
+  /* mesmo padding-esquerdo da barra do avatar (.msgTab): ícone do título e
+     avatar alinham na mesma coluna */
+  padding: 0 .5rem 0 .8rem; pointer-events: none;
 }
+/* ícone e texto ENTALHADOS na aba — mesma receita dos botões da janela:
+   contorno escuro (= borda do botão) + sombra do corte no topo (= inset
+   escuro) + fio de luz no lábio de baixo (= 0 1px branco), mesma espessura. */
+/* ícone colorido (azul do tema) + título claro legível, com um relevo bem
+   discreto (só um fio de luz embaixo) para não ficar totalmente chapado */
+/* ENTALHE (carve): sombra escura no lábio de cima + fio de luz embaixo →
+   a letra e o contorno do ícone parecem afundados na aba. Mantém a cor
+   (ícone azul, título claro), só adiciona o relevo cravado. */
 .msgAbaIco {
   color: var(--primary); flex-shrink: 0;
-  filter: drop-shadow(0 -1px 1px rgba(0,0,0,.45)) drop-shadow(0 1px 0 rgba(255,255,255,.08));
+  filter:
+    drop-shadow(0 -1px 1px rgba(0,0,0,.6))
+    drop-shadow(0 1px 0 rgba(255,255,255,.14));
 }
 .msgAbaTitle {
-  font-size: .84rem; font-weight: 600; letter-spacing: .01em;
-  color: var(--text-dim);
-  text-shadow: 0 -1px 1px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.07);
+  font-size: .9rem; font-weight: 700; letter-spacing: .01em;
+  color: var(--text);
+  text-shadow:
+    0 -1px 1px rgba(0,0,0,.6),        /* corte escuro em cima */
+    0 1px 0 rgba(255,255,255,.14);    /* lábio de luz embaixo */
 }
 :global([data-theme="light"]) .msgAbaIco {
-  filter: drop-shadow(0 1px 0 rgba(255,255,255,.9)) drop-shadow(0 -1px 1px rgba(10,20,60,.16));
+  color: var(--primary);
+  filter:
+    drop-shadow(0 1px 0 rgba(255,255,255,.85))
+    drop-shadow(0 -1px 1px rgba(10,20,60,.35));
 }
 :global([data-theme="light"]) .msgAbaTitle {
   color: var(--text-dim);
-  text-shadow: 0 1px 0 rgba(255,255,255,.9), 0 -1px 1px rgba(10,20,60,.18);
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.85),
+    0 -1px 1px rgba(10,20,60,.32);
 }
 
-/* barra abaixo da aba: avatar + nome + controles — colada ao título (sem o
-   vão em branco): pouco padding no topo */
+/* barra abaixo da aba: avatar + nome + controles — TUDO centralizado na
+   vertical (padding simétrico; align-items já centra os itens entre si) */
 .msgTab {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   display: flex; align-items: center; gap: .5rem;
-  padding: .3rem .55rem .45rem .7rem;
-  border-bottom: 1px solid var(--border);
+  padding: .45rem .55rem .55rem .8rem;
   background: none;
 }
 .msgTab .meuNome { min-width: 0; }
@@ -663,6 +725,21 @@
 .msgTabActions .popIco:hover { background: var(--surface-2); color: var(--primary); }
 .msgTabActions .popIcoDanger:hover { background: rgba(248,113,113,.14); color: var(--danger); }
 .msgTabActions .popIcoOn { color: var(--primary); }
+
+/* ── Cores dos botões de interação (mensagens e notificações) ──
+   cada ação com identidade própria; a janela (recolher/fechar) fica de fora */
+.popIco.icoAzul { color: var(--primary); }
+.popIco.icoAzul:hover { background: var(--primary-dim); color: var(--primary); }
+.popIco.icoVerde { color: var(--success); }
+.popIco.icoVerde:hover { background: rgba(52,211,153,.12); color: var(--success); }
+.popIco.icoCiano { color: var(--accent); }
+.popIco.icoCiano:hover { background: rgba(34,211,238,.12); color: var(--accent); }
+.popIco.icoAmbar { color: var(--warning); }
+.popIco.icoAmbar:hover { background: rgba(251,191,36,.12); color: var(--warning); }
+.popIco.icoVermelho { color: var(--danger); }
+.popIco.icoVermelho:hover { background: rgba(248,113,113,.14); color: var(--danger); }
+.popIco.icoNeutro { color: var(--text-dim); }
+.popIco.icoNeutro:hover { background: var(--surface-2); color: var(--text); }
 
 /* janela (recolher/expandir + fechar): contorno ESCURO, vincado — distinto */
 .msgTabWindow { display: flex; align-items: center; gap: .35rem; flex-shrink: 0; margin-left: .5rem; }
@@ -688,9 +765,59 @@
 }
 .msgUser .meuInfo { flex: 1; min-width: 0; }
 
+/* ── Busca dentro das mensagens ── */
+.msgBusca {
+  position: relative; z-index: 1; flex-shrink: 0;
+  display: flex; align-items: center; gap: .45rem;
+  margin: .4rem .55rem .5rem; padding: 0 .4rem 0 .7rem;
+  height: 40px; border-radius: 99px;
+  /* fundo mais fundo que o entorno reforça o "buraco" onde ela está cravada */
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  border: 1px solid var(--border);
+  /* CRAVADA PARA DENTRO (inner shadow): sombra funda no topo interno + fio de
+     luz no lábio de baixo → parece afundada, não suspensa */
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.55),
+    inset 0 1px 2px rgba(0,0,0,.4),
+    inset 0 -1px 0 rgba(255,255,255,.05);
+  transition: border-color .15s, box-shadow .15s;
+}
+.msgBusca:focus-within {
+  border-color: var(--primary);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.55),
+    inset 0 1px 2px rgba(0,0,0,.4),
+    0 0 0 3px var(--primary-dim);
+}
+:global([data-theme="light"]) .msgBusca {
+  background: color-mix(in srgb, var(--surface-3) 85%, transparent);
+  box-shadow:
+    inset 0 2px 4px rgba(10,20,60,.16),
+    inset 0 1px 2px rgba(10,20,60,.12),
+    inset 0 -1px 0 rgba(255,255,255,.6);
+}
+:global([data-theme="light"]) .msgBusca:focus-within {
+  box-shadow:
+    inset 0 2px 4px rgba(10,20,60,.16),
+    inset 0 1px 2px rgba(10,20,60,.12),
+    0 0 0 3px var(--primary-dim);
+}
+.msgBuscaIco { color: var(--text-muted); flex-shrink: 0; }
+.msgBuscaInput {
+  flex: 1; min-width: 0; background: none; border: none; outline: none;
+  color: var(--text); font-size: .82rem;
+}
+.msgBuscaInput::placeholder { color: var(--text-muted); }
+.msgBuscaClear {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); background: none;
+}
+.msgBuscaClear:hover { background: var(--surface-2); color: var(--text); }
+
 .msgDock .msgList {
   overflow-y: auto; overflow-x: hidden;
-  padding: .75rem .55rem 1rem;
+  padding: .4rem .55rem .75rem;
   display: flex; flex-direction: column;
 }
 .msgDock .msgList::-webkit-scrollbar { width: 6px; }
@@ -706,7 +833,10 @@
   /* espaçadas: uma abaixo da outra, sem sobreposição apertada */
   margin-bottom: 6px; position: relative;
   transform-origin: center top;
-  transition: transform .22s ease, margin-bottom .22s ease, box-shadow .22s ease;
+  /* mola no transform (overshoot só PRA CIMA — crescer nunca tira o cursor
+     de cima do card, então não há flicker) */
+  transition: transform .32s cubic-bezier(.34,1.56,.64,1),
+              box-shadow .22s ease, border-color .22s ease, opacity .22s ease;
 }
 /* profundidade SUTIL só pela escala (cards opacos, sem opacidade nem
    escurecimento) — cada camada um tico menor que a anterior */
@@ -716,31 +846,125 @@
 .msgDock .msgItem:nth-child(4) { z-index: 3; transform: scale(.972); }
 .msgDock .msgItem:nth-child(n+5) { z-index: 2; transform: scale(.965); }
 .msgDock .msgItem:last-child { margin-bottom: 0; }
-/* no hover: pop com mola (motion) — vem à frente, e o texto desliza */
+/* no hover: vem à frente com efeito de mola (a transição do transform tem
+   overshoot). REGRA: nada de translate/margin/keyframe que mova ou encolha o
+   card — mover o box sob o cursor dispara loop hover↔unhover e a mensagem
+   fica "pulando" quando o mouse está na borda. */
 .msgDock .msgItem:hover {
-  margin-bottom: 8px; z-index: 10;
-  box-shadow: 0 12px 26px -6px rgba(0,0,0,.6), 0 0 16px rgba(59,142,245,.18);
-  border-color: rgba(59,142,245,.55);
-  animation: msgPop .32s cubic-bezier(.34,1.56,.64,1) forwards;
+  transform: scale(1) !important;
+  filter: none !important; opacity: 1 !important;
+  z-index: 10;
+  /* borda INTEIRA acesa (via border-color, casa com o raio) + elevação + glow */
+  border-color: rgba(59,142,245,.85);
+  box-shadow:
+    0 12px 26px -6px rgba(0,0,0,.6),
+    0 0 16px rgba(59,142,245,.32);
 }
-@keyframes msgPop {
-  0%   { transform: scale(.95) translateY(7px); }
-  55%  { transform: scale(1.02) translateY(-5px); }
-  100% { transform: scale(1) translateY(-2px); }
+
+/* não lida em hover: pausa o pulso e apenas INTENSIFICA o mesmo inner shadow
+   do repouso (o fio + o brilho interno) — nada se move separado, é a mesma peça */
+.msgDock .msgItem.unread:hover {
+  animation: none;
+  border-color: rgba(59,142,245,.85);
+  box-shadow:
+    inset 2.5px 0 0 rgba(90,140,255,1),
+    inset 18px 0 24px -16px rgba(60,110,255,.6),
+    0 12px 26px -6px rgba(0,0,0,.6),
+    0 0 16px rgba(59,142,245,.32);
 }
-@media (prefers-reduced-motion: reduce) {
-  .msgDock .msgItem:hover { animation: none; transform: scale(1) translateY(-2px); }
+:global([data-theme="light"]) .msgDock .msgItem.unread:hover {
+  box-shadow:
+    inset 2.5px 0 0 rgba(20,90,220,.9),
+    inset 18px 0 24px -16px rgba(20,90,220,.45),
+    0 12px 26px -6px rgba(10,20,60,.25),
+    0 0 16px rgba(59,142,245,.25);
 }
 
 /* X de fechar: vermelho no hover */
 .popIcoClose:hover { background: rgba(248,113,113,.14); color: var(--danger); }
 
-/* recolhida: some a lista; ficam a aba + a linha do usuário */
-.msgDockCollapsed .msgList { display: none; }
+/* recolhida: somem a lista e a busca; ficam a aba + a linha do usuário */
+.msgDockCollapsed .msgList,
+.msgDockCollapsed .msgBusca,
+/* recolhido não há lista para selecionar — o botão sai junto */
+.msgDockCollapsed .msgBtnSel { display: none; }
 .msgDockCollapsed .msgTab { cursor: pointer; }
+/* recolhida: sem lista embaixo, o plano não deve deixar folga nem sombra/risco */
+.msgDockCollapsed .msgPlano { margin-bottom: 0; box-shadow: none; }
 
 /* radar dentro das mensagens do dock */
 .msgDock .msgItem .radar { width: 30px; height: 30px; }
+
+/* ── Não lidas: a luz é INTERNA ao card (inner shadow), não uma barra colada.
+   Um fio de luz fino na borda esquerda + um brilho suave que sangra pra dentro
+   e esmaece — tudo no box-shadow do PRÓPRIO card. Assim é uma peça só, e o
+   hover apenas intensifica o mesmo efeito (nada se move em separado). ── */
+.msgDock .msgItem.unread {
+  background:
+    linear-gradient(90deg, rgba(45,95,255,.10) 0%, rgba(45,95,255,.03) 34%, transparent 62%),
+    var(--surface-2);
+  border-color: var(--border-2);
+  box-shadow:
+    inset 2.5px 0 0 rgba(60,110,255,.85),         /* fio de luz na borda esquerda, por dentro */
+    inset 16px 0 20px -16px rgba(60,110,255,.5),  /* brilho suave sangrando pra dentro */
+    0 4px 12px -6px rgba(0,0,0,.4);
+}
+.msgDock .msgItem.unread .msgNome { font-weight: 700; }
+:global([data-theme="light"]) .msgDock .msgItem.unread {
+  background:
+    linear-gradient(90deg, rgba(10,102,194,.09) 0%, rgba(10,102,194,.03) 34%, transparent 62%),
+    var(--surface-2);
+  border-color: var(--border-2);
+  box-shadow:
+    inset 2.5px 0 0 rgba(20,90,220,.7),
+    inset 16px 0 20px -16px rgba(20,90,220,.35),
+    0 4px 12px -6px rgba(10,20,60,.15);
+}
+
+/* coluna final: hora em cima, controle de leitura embaixo */
+.msgFim {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: .1rem; flex-shrink: 0;
+}
+/* marcar como lida: em repouso é o ponto azul pulsante (indicador de não
+   lida); no hover da mensagem o ponto dá lugar ao envelope aberto (ação) */
+.lidaBtn {
+  position: relative; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  /* envelope "marcar como lida" em CIANO — mesma cor da ação em lote */
+  color: var(--accent); background: none;
+}
+/* envelope com LUZ ciano, no lugar do ícone cru sobre o ponto */
+.lidaBtn svg {
+  opacity: 0; transition: opacity .15s;
+  filter: drop-shadow(0 0 4px rgba(34,211,238,.95)) drop-shadow(0 0 9px rgba(34,211,238,.5));
+}
+.lidaDot {
+  position: absolute; width: 8px; height: 8px; border-radius: 50%;
+  /* AZUL ELÉTRICO (igual à borda esquerda) — sem branco: núcleo azul + halo azul */
+  background: radial-gradient(circle at 40% 38%, #6f97ff 16%, #3c6eff 62%, #244fe8 100%);
+  box-shadow: 0 0 10px rgba(60,110,255,1), 0 0 5px rgba(70,120,255,.95);
+  animation: lidaPulsa 2s ease-in-out infinite;
+  transition: opacity .15s;
+}
+@keyframes lidaPulsa {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%      { transform: scale(1.3);  opacity: .7; }
+}
+.msgDock .msgItem:hover .lidaBtn svg { opacity: 1; }
+/* animation: none é OBRIGATÓRIO: a lidaPulsa anima opacity e, sem desligar a
+   animação, ela vence o opacity:0 do hover — o ponto ficava sob o envelope */
+.msgDock .msgItem:hover .lidaDot { opacity: 0; animation: none; }
+.lidaBtn:hover { background: rgba(34,211,238,.12); }
+
+/* marcar como NÃO lida (mensagens já lidas): envelope fechado em ÂMBAR —
+   mesma cor da ação em lote; só aparece no hover da mensagem */
+.naoLidaBtn { color: var(--warning); }
+.naoLidaBtn svg {
+  filter: drop-shadow(0 0 4px rgba(251,191,36,.85)) drop-shadow(0 0 9px rgba(251,191,36,.4));
+}
+.naoLidaBtn:hover { background: rgba(251,191,36,.12); }
+@media (prefers-reduced-motion: reduce) { .lidaDot { animation: none; } }
 
 /* ── Popup de confirmação de exclusão ── */
 .confirmOverlay {
@@ -784,3 +1008,9 @@
   border: 1px solid rgba(248,113,113,.5);
 }
 .confirmDel:hover { box-shadow: 0 0 16px rgba(248,113,113,.5); }
+
+/* ── Impressão: a barra superior não sai no papel ── */
+@media print {
+  .header { display: none !important; }
+  .msgDock, .popup, .dropdown { display: none !important; }
+}

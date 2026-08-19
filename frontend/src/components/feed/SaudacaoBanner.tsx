@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import styles from "./SaudacaoBanner.module.css";
 
 type Periodo = "manha" | "tarde" | "noite";
@@ -18,7 +19,7 @@ function CenaManha() {
     ["#ff8a8a", 98], ["#ffc078", 92], ["#ffe680", 86],
     ["#8ce99a", 80], ["#74c0fc", 74], ["#b197fc", 68],
   ];
-  const AX = 500, AY = 138; // centro do arco-íris (à direita, longe do texto)
+  const AX = 205, AY = 140; // centro do arco-íris — à ESQUERDA, longe do sol
   return (
     <svg className={styles.cena} viewBox="0 0 720 120" preserveAspectRatio="xMidYMid slice" aria-hidden>
       <defs>
@@ -32,10 +33,12 @@ function CenaManha() {
           <stop offset="55%" stopColor="#ffd873" />
           <stop offset="100%" stopColor="#ffb84d" />
         </radialGradient>
-        {/* risco do avião: opaco perto do avião, some ao longe (atrás) */}
-        <linearGradient id="contrailManha" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity=".85" />
+        {/* risco (condensação) do avião: opaco perto do avião, some ao longe.
+            userSpaceOnUse é ESSENCIAL — a linha é horizontal (bbox de altura 0)
+            e com objectBoundingBox o gradiente não renderizava (risco sumia). */}
+        <linearGradient id="contrailManha" x1="-120" y1="0" x2="-4" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0"   stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="1"   stopColor="#ffffff" stopOpacity=".92" />
         </linearGradient>
       </defs>
       <rect width="720" height="120" fill="url(#ceuManha)" />
@@ -54,13 +57,11 @@ function CenaManha() {
           ângulo do voo; o externo translada ao longo da mesma diagonal */}
       <g className={styles.aviao}>
         <g className={styles.aviaoInner}>
-          <line x1="-116" y1="0" x2="-5" y2="0" stroke="url(#contrailManha)" strokeWidth="2.2" strokeLinecap="round" />
-          <g fill="#33404f">
-            <path d="M7 0 L-7 -1.6 L-7 1.6 Z" />
-            <path d="M-1 0 L-7 -5.5 L-3.5 0 Z" />
-            <path d="M-1 0 L-7 5.5 L-3.5 0 Z" />
-            <path d="M-7 0 L-10 -3 L-7.5 0 Z" />
-          </g>
+          {/* condensação: um traço largo e suave (a nuvem) + um fino e nítido */}
+          <line x1="-120" y1="0" x2="-4" y2="0" stroke="url(#contrailManha)" strokeWidth="3.4" strokeLinecap="round" opacity=".55" />
+          <line x1="-118" y1="0" x2="-4" y2="0" stroke="url(#contrailManha)" strokeWidth="1.4" strokeLinecap="round" />
+          {/* avião: silhueta limpa de jato (corpo + asas enflechadas + cauda) */}
+          <path fill="#33404f" d="M11 0 L2 -1.4 L-3 -1.4 L-9 -6 L-5 -1.4 L-9 -1.3 L-11 -3 L-9 0 L-11 3 L-9 1.3 L-5 1.4 L-9 6 L-3 1.4 L2 1.4 Z" />
         </g>
       </g>
 
@@ -280,7 +281,14 @@ const CENAS: Record<Periodo, () => React.ReactElement> = {
 
 export default function SaudacaoBanner({ nome }: { nome: string }) {
   const h = new Date().getHours();
-  const periodo: Periodo = h >= 5 && h < 12 ? "manha" : h >= 12 && h < 18 ? "tarde" : "noite";
+  // pré-visualização opcional: ?cena=manha|tarde|noite força a paisagem
+  // (sem o parâmetro, segue o horário real)
+  const [preview, setPreview] = useState<Periodo | null>(null);
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get("cena");
+    if (c === "manha" || c === "tarde" || c === "noite") setPreview(c);
+  }, []);
+  const periodo: Periodo = preview ?? (h >= 5 && h < 12 ? "manha" : h >= 12 && h < 18 ? "tarde" : "noite");
   const { saud, sub } = CONFIG[periodo];
   const Cena = CENAS[periodo];
   const primeiro = nome.replace(/^Prof\.?\s+/i, "").split(" ")[0];

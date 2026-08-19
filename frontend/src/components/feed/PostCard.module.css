@@ -6,6 +6,10 @@
   overflow: hidden; transition: border-color .18s, box-shadow .18s, transform .15s;
   position: relative;
   box-shadow: var(--edge);
+  /* posts fora da viewport não são renderizados (feed longo: só o visível
+     custa layout/paint — o vidro/blur de cada card é caro) */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
   animation: cardIn .3s ease;
 }
 .card:hover { border-color: var(--border-2); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
@@ -77,6 +81,29 @@
 .truncated {
   display: -webkit-box; -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ── Capa do post ──────────────────────────────────────────────────────────
+   Sangra até as bordas do card (é imagem, não conteúdo emoldurado) e mantém
+   proporção fixa, para o feed não "pular" enquanto a imagem carrega. */
+.capa {
+  position: relative;
+  margin: .25rem 0 .875rem;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.capa img {
+  display: block; width: 100%; aspect-ratio: 12 / 5; object-fit: cover;
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+.capa:hover img { transform: scale(1.02); }
+/* véu suave na base: assenta a imagem no cartão em vez de cortá-la a seco */
+.capa::after {
+  content: ''; position: absolute; inset: auto 0 0 0; height: 38%;
+  background: linear-gradient(to top, color-mix(in srgb, var(--surface) 55%, transparent), transparent);
+  pointer-events: none;
 }
 /* Ler mais / ver menos: 3 pontinhos verticais dentro de uma bola, centralizado */
 .lerMaisRow { display: flex; justify-content: center; margin-top: .5rem; }

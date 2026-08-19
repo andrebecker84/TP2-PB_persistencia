@@ -2,21 +2,19 @@
   position: relative;
   min-height: 100vh;
   display: flex; flex-direction: column;
+  /* Uma fonte de luz principal no alto, ampla e fria, e um segundo foco quase
+     imperceptível no rodapé à direita, só para o fundo não ficar chapado.
+     Sem textura de linhas: a página respira melhor com o vazio limpo. */
+  /* uma luz fria só, em azul — o ciano puxava o degradê para o esverdeado */
   background:
-    radial-gradient(ellipse 95% 55% at 50% 0%, rgba(59,142,245,.13) 0%, rgba(34,211,238,.05) 38%, transparent 66%),
-    radial-gradient(ellipse 58% 50% at 10% 28%, rgba(59,142,245,.08), transparent 60%),
-    radial-gradient(ellipse 52% 46% at 92% 72%, rgba(34,211,238,.07), transparent 62%),
+    radial-gradient(ellipse 110% 62% at 50% -6%, rgba(59,142,245,.09) 0%, rgba(59,142,245,.03) 45%, transparent 74%),
+    radial-gradient(ellipse 60% 48% at 88% 88%, rgba(59,142,245,.028), transparent 68%),
     var(--bg);
 }
-/* textura de linhas diagonais finas, esmaecendo nas bordas (como o exemplo) */
-.app::before {
-  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: repeating-linear-gradient(118deg, rgba(255,255,255,.02) 0 1px, transparent 1px 23px);
-  -webkit-mask-image: radial-gradient(ellipse 92% 82% at 50% 22%, #000 28%, transparent 82%);
-          mask-image: radial-gradient(ellipse 92% 82% at 50% 22%, #000 28%, transparent 82%);
-}
-:global([data-theme="light"]) .app::before {
-  background-image: repeating-linear-gradient(118deg, rgba(20,40,90,.03) 0 1px, transparent 1px 23px);
+:global([data-theme="light"]) .app {
+  background:
+    radial-gradient(ellipse 110% 62% at 50% -6%, rgba(10,102,194,.07) 0%, rgba(10,102,194,.02) 42%, transparent 72%),
+    var(--bg);
 }
 
 .content {
@@ -41,4 +39,10 @@
    (é position:fixed) em vez de empurrá-lo — o conteúdo mantém a margem mini. */
 @media (max-width: 760px) {
   .content { margin-left: calc(var(--sidebar-mini) + 28px) !important; }
+}
+
+/* ── Impressão: conteúdo ocupa a folha inteira, sem cromo da interface ── */
+@media print {
+  .app { background: #fff !important; }
+  .content { margin-left: 0 !important; min-height: 0 !important; animation: none !important; }
 }

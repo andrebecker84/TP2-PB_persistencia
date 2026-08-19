@@ -17,6 +17,8 @@ export interface Post {
   id: number;
   titulo: string | null;
   conteudo: string;
+  /** capa opcional do post — caminho servido pelo front ou URL */
+  imagemUrl: string | null;
   autorId: number;
   autorNome: string;
   autorEmail: string;
@@ -30,6 +32,7 @@ export interface Post {
 export interface PostRequest {
   titulo?: string;
   conteudo: string;
+  imagemUrl?: string | null;
   autorId: number;
 }
 

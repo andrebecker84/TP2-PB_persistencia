@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback, SetStateAction } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Briefcase } from "lucide-react";
 import { Vaga, VagaRequest } from "@/types";
 import { vagaService } from "@/services/vagaService";
 import { useUsuarioLogado } from "@/hooks/useCurrentUser";
@@ -96,7 +96,8 @@ function VagasContent() {
         <main className={styles.main}>
 
           <div className={styles.pageHeader}>
-            <div>
+            <div className={styles.headIco}><Briefcase size={20} /></div>
+            <div className={styles.headInfo}>
               <h1 className={styles.pageTitle}>Vagas &amp; Oportunidades</h1>
               <p className={styles.pageSubtitle}>
                 Encontre estágios, empregos e oportunidades para a sua carreira
@@ -130,7 +131,7 @@ function VagasContent() {
             </div>
           ) : filteredVagas.length === 0 ? (
             <div className={styles.empty}>
-              <span>💼</span>
+              <Briefcase size={48} className={styles.emptyIcon} />
               <p>{query ? `Nenhuma vaga encontrada para "${query}".` : "Nenhuma vaga disponível no momento."}</p>
             </div>
           ) : (

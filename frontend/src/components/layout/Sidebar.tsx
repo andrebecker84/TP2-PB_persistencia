@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard, User, Users, Trophy, Briefcase,
-  MessageSquare, Settings, LogOut,
+  MessageSquare, Settings, LogOut, Activity, GraduationCap,
   FileText, BookOpen, Monitor, CalendarDays, BookMarked,
   Menu, PanelLeftClose, ExternalLink, X, Sun, Moon, Palette,
 } from "lucide-react";
@@ -15,6 +15,8 @@ import { signOut } from "@/hooks/useCurrentUser";
 import { initials } from "@/utils/format";
 import { CORES } from "@/utils/colors";
 import { MENSAGENS_NAO_LIDAS } from "@/data/inbox";
+import { useStatus, infoStatus } from "@/hooks/useStatus";
+import StatusPicker from "./StatusPicker";
 import HexLogo from "@/components/ui/HexLogo";
 import styles from "./Sidebar.module.css";
 
@@ -25,14 +27,19 @@ interface Props {
 }
 
 const NAV: { label: string; icon: LucideIcon; href: string; badge?: number }[] = [
-  { label: "Feed",          icon: LayoutDashboard, href: "/feed"  },
-  { label: "Perfil",        icon: User,            href: "/feed"  },
-  { label: "Grupos",        icon: Users,           href: "/feed"  },
-  { label: "Trilhas",       icon: Trophy,          href: "/feed"  },
-  { label: "Vagas",         icon: Briefcase,       href: "/vagas" },
-  { label: "Mensagens",     icon: MessageSquare,   href: "/feed", badge: MENSAGENS_NAO_LIDAS },
-  { label: "Configurações", icon: Settings,        href: "/feed"  },
+  { label: "Feed",           icon: LayoutDashboard, href: "/feed"  },
+  { label: "Perfil",         icon: User,            href: "/perfil" },
+  { label: "Meu Desempenho", icon: Activity,        href: "/desempenho" },
+  { label: "Boletim",        icon: GraduationCap,   href: "/boletim" },
+  { label: "Grupos",         icon: Users,           href: "/feed"  },
+  { label: "Trilhas",        icon: Trophy,          href: "/feed"  },
+  { label: "Vagas",          icon: Briefcase,       href: "/vagas" },
+  { label: "Mensagens",      icon: MessageSquare,   href: "/feed", badge: MENSAGENS_NAO_LIDAS },
+  { label: "Configurações",  icon: Settings,        href: "/feed"  },
 ];
+
+/* rotas reais (recebem destaque de "ativo" quando a URL bate) */
+const ROTAS_REAIS = new Set(["Feed", "Perfil", "Vagas", "Meu Desempenho", "Boletim"]);
 
 const LINKS = [
   { label: "Requerimentos",        icon: FileText,     noEmbed: false, href: "https://requerimentos.infnet.edu.br/",                                                             extHref: "https://requerimentos.infnet.edu.br/" },
@@ -53,6 +60,7 @@ export default function Sidebar({ expanded, currentUser, onToggleSidebar }: Prop
   const contaRef = useRef<HTMLButtonElement>(null);
 
   const cor = CORES[currentUser.id % CORES.length];
+  const statusAtual = useStatus();
 
   useEffect(() => {
     if (!contaMenu) return;
@@ -107,12 +115,12 @@ export default function Sidebar({ expanded, currentUser, onToggleSidebar }: Prop
       </div>
 
       {/* divisória entre a marca e o menu (sem linha em branco) */}
-      <div className={styles.divider} />
+      <div className={`${styles.divider} ${styles.dividerNav}`} />
 
       {/* ── Navegação principal (Plataforma) ── */}
       <nav className={styles.nav}>
         {NAV.map(({ label, icon: Icon, href, badge }) => {
-          const active = pathname === href && (label === "Feed" || label === "Vagas");
+          const active = pathname === href && ROTAS_REAIS.has(label);
           return (
             <button
               key={label}
@@ -132,7 +140,7 @@ export default function Sidebar({ expanded, currentUser, onToggleSidebar }: Prop
       </nav>
 
       {/* divisória entre Configurações (Plataforma) e Requerimentos (Institucional) */}
-      <div className={styles.divider} />
+      <div className={`${styles.divider} ${styles.dividerNav}`} />
 
       <div className={styles.linkList}>
         {LINKS.map(({ label, icon: Icon, href, extHref, noEmbed }) => (
@@ -243,7 +251,8 @@ export default function Sidebar({ expanded, currentUser, onToggleSidebar }: Prop
         >
           <div className={styles.contaAvatarWrap}>
             <div className={styles.contaAvatar} style={{ background: cor }}>{initials(currentUser.nome)}</div>
-            <span className={styles.contaStatus} />
+            <span className={styles.contaStatus} data-status={statusAtual}
+              style={{ background: infoStatus(statusAtual).cor }} title={infoStatus(statusAtual).label} />
           </div>
           <div className={styles.contaInfo}>
             <span className={styles.contaNome}>{currentUser.nome}</span>
@@ -263,6 +272,7 @@ export default function Sidebar({ expanded, currentUser, onToggleSidebar }: Prop
             <div className={styles.contaMenuNome}>{currentUser.nome}</div>
             <div className={styles.contaMenuPapel}>{currentUser.papelDescricao}</div>
             <div className={styles.contaMenuEmail}>{currentUser.email}</div>
+            <div className={styles.contaMenuStatus}><StatusPicker /></div>
           </div>
           <button className={styles.contaSair} onClick={() => signOut(router)}>
             <LogOut size={15} /> Sair

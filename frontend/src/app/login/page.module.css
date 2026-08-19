@@ -1,220 +1,181 @@
-/* Fundo estilo AuthKit: navy profundo, facho de luz descendo do topo e uma
-   grade técnica sutil desenhada só com gradientes — nenhuma imagem extra. */
+/* ─────────────────────────────────────────────────────────────────────────
+   Login — uma coluna só, no padrão das telas de autenticação atuais:
+   muito respiro, hierarquia por tipografia, bordas de 1px e uma única fonte
+   de luz no fundo. Nada de painel ilustrado, grade, varreduras ou glows —
+   a tela existe para uma decisão só: escolher o perfil e continuar.
+   ───────────────────────────────────────────────────────────────────────── */
+
 .page {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;
-  position: relative;
-  background:
-    radial-gradient(ellipse 60% 45% at 50% -8%, rgba(59,142,245,.16) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 35% at 78% 82%, rgba(34,211,238,.06) 0%, transparent 55%),
-    var(--bg);
-}
-.page::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(rgba(140,158,235,.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(140,158,235,.05) 1px, transparent 1px);
-  background-size: 56px 56px;
-  /* a grade só existe perto do facho, esmaecendo nas bordas */
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 0%, transparent 75%);
-          mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 0%, transparent 75%);
-  pointer-events: none;
-}
-
-/* "Mergulho" ao entrar: a página se aproxima e dissolve, emendando com a
-   animação de entrada do hub — a sensação de atravessar a tela. */
-.pageSaindo {
-  animation: mergulho .45s cubic-bezier(.55,0,.75,.4) forwards;
-  pointer-events: none;
-}
-@keyframes mergulho {
-  to { opacity: 0; transform: scale(1.12); }
-}
-
-/* Lâmina de vidro: translúcida (o facho e a grade vazam pelo blur), aresta de
-   luz no topo e brilho frio embaixo — o card da referência. */
-.card {
-  display: flex; width: 100%; max-width: 900px; min-height: 540px;
-  position: relative; z-index: 1;
-  background: var(--glass-bg);
-  backdrop-filter: blur(18px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
-    0 24px 70px rgba(0,0,0,.5),
-    0 0 40px rgba(59,142,245,.14);
-  animation: cardEntra .55s cubic-bezier(.22,1,.36,1);
-}
-/* aresta de luz varrendo o topo do vidro */
-.card::after {
-  content: '';
-  position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
-  pointer-events: none;
-}
-@keyframes cardEntra {
-  from { opacity: 0; transform: translateY(18px) scale(.975); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* ── Painel da marca ── */
-.brand {
-  flex: 1.05;
-  position: relative;
-  overflow: hidden;
-  border-right: 1px solid var(--border);
-  display: flex;
-  min-height: 500px;
-}
-
-/* Ken Burns: zoom lento e contínuo na foto — movimento sem depender do mouse */
-.brandBg {
-  position: absolute; inset: 0;
-  background-image: url('/images/login-bg.jpg');
-  background-size: cover; background-position: center;
-  animation: kenBurns 22s ease-in-out infinite alternate;
-  will-change: transform;
-}
-@keyframes kenBurns {
-  from { transform: scale(1.02); }
-  to   { transform: scale(1.14) translateX(-8px); }
-}
-
-/* Gradiente ancorado embaixo: a foto respira no topo, o texto assenta na base */
-.brandOverlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(3, 9, 24, .94) 0%,
-    rgba(3, 9, 24, .62) 38%,
-    rgba(3, 9, 24, .18) 72%,
-    rgba(3, 9, 24, .38) 100%
-  );
-}
-
-.brandContent {
-  position: relative; z-index: 1;
-  display: flex; flex-direction: column; justify-content: space-between;
-  width: 100%;
-  padding: 2.25rem;
-}
-
-.logo { display: flex; align-items: center; gap: .75rem; }
-
-.logoText {
-  font-size: 1.35rem; font-weight: 200; letter-spacing: .22em;
-  color: #eaf1ff;
-  text-shadow: 0 2px 20px rgba(0,0,0,.55), 0 0 18px rgba(59,142,245,.35);
-}
-.logoText b { font-weight: 500; }
-
-.brandFooter { display: flex; flex-direction: column; gap: 1.25rem; }
-
-.tagline {
-  font-size: 1.05rem; font-weight: 600; letter-spacing: .02em;
-  color: rgba(255,255,255,.95); line-height: 1.5;
-  text-shadow: 0 1px 12px rgba(0,0,0,.45);
-}
-
-.features { list-style: none; display: flex; flex-direction: column; gap: .625rem; }
-.features li {
-  display: flex; align-items: center; gap: .75rem;
-  font-size: .9rem; font-weight: 600; color: rgba(255,255,255,.92);
-  opacity: 0;
-  animation: featEntra .5s ease forwards;
-}
-.features li:nth-child(1) { animation-delay: .3s; }
-.features li:nth-child(2) { animation-delay: .42s; }
-.features li:nth-child(3) { animation-delay: .54s; }
-.features li:nth-child(4) { animation-delay: .66s; }
-@keyframes featEntra {
-  from { opacity: 0; transform: translateX(-12px); }
-  to   { opacity: 1; transform: none; }
-}
-
-.featureIcon {
-  flex-shrink: 0;
-  width: 30px; height: 30px;
+  position: relative; min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  color: #fff;
-  background: rgba(255,255,255,.13);
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 9px;
-  backdrop-filter: blur(6px);
+  padding: 2rem 1rem;
+  background: var(--bg);
+  overflow: hidden;
 }
-.features li:hover .featureIcon {
-  background: rgba(59,142,245,.4);
-  border-color: rgba(59,142,245,.6);
+/* a única luz da tela: um foco largo e discreto atrás do conteúdo */
+.luz {
+  position: absolute; top: -22%; left: 50%; transform: translateX(-50%);
+  width: min(900px, 120vw); height: 620px; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, rgba(59,142,245,.14), transparent 68%);
 }
 
-/* ── Painel do formulário ── */
-.form {
-  flex: 1; padding: 3rem 2.5rem;
+.coluna {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 400px;
+  display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+  animation: entra .5s cubic-bezier(.22,1,.36,1);
+  transition: transform .42s cubic-bezier(.4,0,.2,1), opacity .42s;
+}
+@keyframes entra { from { opacity: 0; transform: translateY(12px); } }
+/* ao entrar, a coluna recua um passo enquanto o hub toma a frente */
+.recuando { transform: scale(.97); opacity: .55; pointer-events: none; }
+
+/* abertura circular: o hub nasce do próprio botão que foi acionado */
+.veu {
+  position: fixed; inset: 0; z-index: 10; pointer-events: none;
+  background: var(--bg);
+  clip-path: circle(0% at var(--vx) var(--vy));
+  animation: abertura .52s cubic-bezier(.5,0,.35,1) forwards;
+}
+@keyframes abertura {
+  from { clip-path: circle(0% at var(--vx) var(--vy)); }
+  to   { clip-path: circle(150% at var(--vx) var(--vy)); }
+}
+
+/* ── Marca ── */
+.marca { display: flex; align-items: center; gap: .55rem; }
+.marcaTxt {
+  font-size: 1rem; font-weight: 300; letter-spacing: .18em;
+  color: var(--text-dim);
+}
+.marcaTxt b { font-weight: 600; color: var(--text); }
+
+/* ── Card ── */
+.card {
+  width: 100%;
   display: flex; flex-direction: column; gap: 1.25rem;
+  padding: 1.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.28), 0 24px 60px -28px rgba(0,0,0,.7);
 }
-.title    { font-size: 1.875rem; font-weight: 800; color: var(--text); }
-.subtitle { font-size: .9375rem; color: var(--text-muted); margin-top: -.75rem; }
-
-.error {
-  background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.25);
-  border-radius: var(--radius); padding: .75rem 1rem;
-  font-size: .875rem; color: var(--danger);
+:global([data-theme="light"]) .card {
+  box-shadow: 0 1px 2px rgba(10,20,60,.06), 0 20px 48px -26px rgba(10,20,60,.28);
 }
 
-.loading { display: flex; flex-direction: column; gap: .75rem; }
+.cabecalho { display: flex; flex-direction: column; gap: .3rem; }
+.titulo {
+  font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.1;
+}
+.sub { font-size: .875rem; color: var(--text-muted); }
+
+/* ── Erro ── */
+.erro {
+  display: flex; align-items: flex-start; gap: .55rem;
+  padding: .7rem .85rem; border-radius: 10px;
+  font-size: .8125rem; line-height: 1.4; color: var(--danger);
+  background: rgba(248,113,113,.09);
+  border: 1px solid rgba(248,113,113,.24);
+}
+.erroIco { flex-shrink: 0; margin-top: 1px; }
+
+/* ── Lista de perfis ── */
+.lista {
+  display: flex; flex-direction: column; gap: .25rem;
+  max-height: 268px; overflow-y: auto;
+  margin: 0 -.35rem; padding: 0 .35rem;
+  /* a lista esmaece só do lado em que ainda há conteúdo escondido — assim a
+     linha do limite não fica cortada ao meio, como se estivesse quebrada */
+  transition: mask-image .2s;
+}
+.lista[data-borda="baixo"] { mask-image: linear-gradient(to bottom, #000 calc(100% - 34px), transparent); }
+.lista[data-borda="cima"]  { mask-image: linear-gradient(to top,    #000 calc(100% - 34px), transparent); }
+.lista[data-borda="ambos"] {
+  mask-image: linear-gradient(to bottom, transparent, #000 34px, #000 calc(100% - 34px), transparent);
+}
+.lista::-webkit-scrollbar { width: 5px; }
+.lista::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+.lista::-webkit-scrollbar-track { background: transparent; }
+
+.perfil {
+  display: flex; align-items: center; gap: .75rem; width: 100%;
+  padding: .6rem .65rem; text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: background .14s, border-color .14s;
+}
+.perfil:hover { background: var(--surface-2); }
+.perfil:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.perfilOn {
+  background: var(--primary-dim);
+  border-color: color-mix(in srgb, var(--primary) 42%, transparent);
+}
+
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8125rem; font-weight: 600; color: #fff;
+}
+.info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.nome {
+  font-size: .875rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.meta {
+  font-size: .75rem; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* marcador de seleção: sempre presente, para a linha não "pular" ao escolher */
+.marcador {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border-2);
+  transition: background .14s, border-color .14s, color .14s;
+}
+.perfilOn .marcador {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
+
 .skeleton {
-  height: 68px; border-radius: var(--radius);
+  height: 50px; border-radius: 10px;
   background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
   background-size: 200% 100%; animation: shimmer 1.4s infinite;
 }
-@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-.userList { display: flex; flex-direction: column; gap: .625rem; max-height: 290px; overflow-y: auto; }
+/* ── Ação ── */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+  width: 100%; padding: .7rem 1rem;
+  font-size: .9375rem; font-weight: 600; color: #fff;
+  background: var(--primary);
+  border-radius: 10px;
+  transition: background .15s, opacity .15s;
+}
+.btn:hover:not(:disabled) { background: var(--primary-hover); }
+.btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* desabilitado é inerte de verdade: superfície neutra, não um azul apagado */
+.btn:disabled {
+  background: var(--surface-2); color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--border);
+  cursor: default;
+}
+.seta { transition: transform .18s cubic-bezier(.34,1.4,.64,1); }
+.btn:hover:not(:disabled) .seta { transform: translateX(3px); }
+.girando { animation: gira .8s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
 
-.userCard {
-  display: flex; align-items: center; gap: .875rem;
-  padding: .875rem 1rem;
-  background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,0) 50%), var(--surface-2);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-  text-align: left;
-  transition: border-color .15s, background .15s, box-shadow .15s, transform .15s;
-}
-.userCard:hover { border-color: var(--primary); background: var(--surface-3); transform: translateX(3px); }
-.userCardSelected {
-  border-color: var(--primary) !important;
-  background: var(--primary-dim) !important;
-  box-shadow: 0 0 0 2px var(--primary-glow);
-}
-.avatar {
-  width: 42px; height: 42px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .875rem; font-weight: 700; color: #fff; flex-shrink: 0;
-}
-.userInfo { flex: 1; min-width: 0; }
-.userName { display: block; font-size: .9375rem; font-weight: 600; color: var(--text); }
-.userMeta { display: block; font-size: .75rem; color: var(--text-muted); margin-top: 1px; }
-.check { color: var(--primary); font-weight: 700; font-size: 1rem; }
+.rodape { font-size: .75rem; color: var(--text-muted); text-align: center; }
 
-.btnEntrar {
-  background: var(--gradient); color: #fff;
-  padding: .8rem 1.5rem; border-radius: var(--pill);
-  font-size: 1rem; font-weight: 700; width: 100%;
-  margin-top: auto;
-  display: flex; align-items: center; justify-content: center; gap: .5rem;
-  box-shadow: 0 4px 18px var(--primary-glow);
-  transition: box-shadow .2s, transform .15s, opacity .15s;
+@media (max-width: 420px) {
+  .card { padding: 1.4rem 1.2rem; }
 }
-.btnEntrar:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 28px var(--primary-glow);
-}
-
-@media (max-width: 640px) {
-  .card { flex-direction: column; }
-  .brand { display: none; }
-  .form { padding: 2rem 1.5rem; }
+@media (prefers-reduced-motion: reduce) {
+  .coluna, .skeleton, .girando { animation: none; }
+  .veu { animation: none; clip-path: circle(150% at 50% 50%); }
+  .recuando { transform: none; }
 }

@@ -56,6 +56,9 @@
   background: var(--border-2);
   margin: .55rem .7rem;
 }
+/* dividers do topo alinham a MESMA largura do de baixo (o rodapé tem +.5rem de
+   padding, então esses ganham +.5rem de margem lateral para igualar) */
+.dividerNav { margin-left: 1.2rem; margin-right: 1.2rem; }
 
 .hamburger {
   width: 34px; height: 34px; border-radius: var(--radius);
@@ -355,12 +358,32 @@
   box-shadow: 0 0 0 2px rgba(59,142,245,.35);
 }
 /* status online no avatar */
+/* a cor vem do status escolhido (useStatus) — igual ao da tab bar e do dock */
 .contaStatus {
   position: absolute; bottom: 0; right: 0;
   width: 10px; height: 10px; border-radius: 50%;
   background: var(--success);
-  box-shadow: 0 0 0 2px var(--surface), 0 0 6px rgba(34,197,94,.55);
+  box-shadow: 0 0 0 2px var(--surface);
+  transition: background .25s;
 }
+.contaStatus[data-status="online"]   { animation: contaPulso 2.2s ease-in-out infinite; }
+.contaStatus[data-status="ausente"],
+.contaStatus[data-status="dormindo"] { animation: contaRespira 3.2s ease-in-out infinite; }
+.contaStatus[data-status="ocupado"]  { animation: contaBatida 2s ease-out infinite; }
+.contaStatus[data-status="offline"]  { opacity: .75; }
+@keyframes contaPulso {
+  0%, 100% { box-shadow: 0 0 0 2px var(--surface); }
+  15%      { box-shadow: 0 0 0 2px var(--surface), 0 0 9px 1px currentColor; }
+}
+@keyframes contaRespira { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+@keyframes contaBatida {
+  0%, 42%, 100% { transform: scale(1); }
+  10%           { transform: scale(1.35); }
+  30%           { transform: scale(1.22); }
+}
+
+/* seletor de status no menu da conta */
+.contaMenuStatus { margin-top: .5rem; display: flex; justify-content: center; }
 .contaInfo {
   display: flex; flex-direction: column; align-items: flex-start; min-width: 0;
   max-width: 0; opacity: 0; overflow: hidden;
@@ -472,3 +495,8 @@
   box-shadow: 0 2px 12px var(--primary-glow);
 }
 .modalBlockedBtn:hover { opacity: .9; text-decoration: none; }
+
+/* ── Impressão: a sidebar não sai no papel ── */
+@media print {
+  .sidebar { display: none !important; }
+}

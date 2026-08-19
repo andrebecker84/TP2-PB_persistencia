@@ -1,6 +1,10 @@
 .banner {
   position: relative; overflow: hidden;
   height: 96px;
+  /* rolou pra fora da tela → o navegador pula o render do banner inteiro
+     (a cena tem dezenas de animações; sem isto elas repintavam à toa) */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 96px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
   box-shadow:
@@ -130,16 +134,19 @@
 @keyframes acenaCrianca { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-30deg); } }
 
 /* cachorro correndo pelo morro, com galope (bob) */
-.cachorro { transform-box: fill-box; animation: cachorroCorre 9s linear infinite; }
+/* cachorrinho: entra por baixo, SOBE correndo o morro até o menino, SENTA ao
+   lado dele, depois DESCE correndo e some na borda inferior do banner */
+.cachorro { transform-box: fill-box; animation: cachorroCorre 13s ease-in-out infinite; }
 @keyframes cachorroCorre {
-  0%   { transform: translate(-40px, 3px); }
-  12%  { transform: translate(70px, 0); }
-  24%  { transform: translate(180px, 3px); }
-  36%  { transform: translate(290px, 0); }
-  50%  { transform: translate(400px, 3px); }
-  64%  { transform: translate(510px, 0); }
-  80%  { transform: translate(640px, 3px); }
-  100% { transform: translate(770px, 0); }
+  0%   { opacity: 0; transform: translate(110px, 44px) scaleX(1); }
+  5%   { opacity: 1; }
+  16%  { transform: translate(220px, 20px) scaleX(1); }   /* subindo */
+  30%  { transform: translate(332px, 0)    scaleX(1); }   /* chega ao menino */
+  34%, 56% { transform: translate(332px, 0) scaleX(1); }  /* SENTADO ao lado do menino */
+  60%  { transform: translate(324px, 4px)  scaleX(-1); }  /* vira para descer */
+  74%  { transform: translate(240px, 40px) scaleX(-1); }  /* descendo */
+  95%  { transform: translate(150px, 120px) scaleX(-1); } /* borda inferior */
+  100% { opacity: 0; transform: translate(140px, 132px) scaleX(-1); }
 }
 /* patas alternam (corrida) e rabo abana */
 .pataA { transform-box: fill-box; transform-origin: top center; animation: pataSwing .3s ease-in-out infinite; }
