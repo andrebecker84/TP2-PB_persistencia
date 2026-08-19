@@ -82,7 +82,7 @@ toda mudança deixe rastro.
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     Cliente (Browser)                           │
-│              Next.js 15 · React 19 · TypeScript                 │
+│              Next.js 16 · React 19 · TypeScript                 │
 │                    localhost:13000                              │
 └──────────────────────────┬──────────────────────────────────────┘
                            │ HTTP REST (JSON) + header X-Usuario-Id
@@ -287,7 +287,7 @@ auditoria foi introduzida **sem alterar contrato algum** — evidência prática
 
 ### Tecnologia
 
-- **Next.js 15** com App Router e **React 19** (`useState`, `useEffect`, `useCallback`)
+- **Next.js 16** com App Router e **React 19** (`useState`, `useEffect`, `useCallback`)
 - **TypeScript** para tipagem estática
 - **CSS Modules** para estilização escopada
 
@@ -375,7 +375,7 @@ A escolha foi guiada pelo domínio, não por preferência:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Cliente (Next.js 15)                            localhost:13000      │
+│  Cliente (Next.js 16)                            localhost:13000      │
 └───────────────────────────────┬──────────────────────────────────────┘
                                 │ HTTP + header X-Usuario-Id
                                 ▼
@@ -883,12 +883,32 @@ Validação em código é conferida **antes** da escrita e não impede que duas 
 ```
 src/main/resources/db/migration/
 ├── V1__criar_schema_dominio.sql      → 5 tabelas, FKs, constraints, checks, 10 índices
-└── V2__criar_schema_auditoria.sql    → sequência, revisao_auditoria, 4 tabelas _aud, índices
+├── V2__criar_schema_auditoria.sql    → sequência, revisao_auditoria, 4 tabelas _aud, índices
+└── V3__adicionar_imagem_ao_post.sql  → coluna imagem_url em posts E posts_aud
 ```
 
 Nos perfis `dev` e `prod`: **Flyway cria o schema, `ddl-auto=validate`**. O Hibernate não altera nada — apenas confere se o mapeamento das entidades bate com as tabelas e **falha no start** caso tenham divergido. É a diferença entre um schema que evolui de forma controlada e um que muda sozinho.
 
 O DDL das migrations foi derivado do schema que o próprio Hibernate gera para PostgreSQL (`jakarta.persistence.schema-generation`), garantindo aderência exata, e depois reescrito com nomes de constraint explícitos e comentários.
+
+### V3 — evoluir uma entidade auditada exige duas alterações, não uma
+
+A V3 acrescenta a capa opcional do post:
+
+```sql
+ALTER TABLE posts     ADD COLUMN imagem_url VARCHAR(500);
+ALTER TABLE posts_aud ADD COLUMN imagem_url VARCHAR(500);
+```
+
+A segunda linha não é redundância — é a lição que essa migration ensina. `Post` é `@Audited`, e o Envers audita **todo** atributo que não esteja marcado com `@NotAudited`. Ao ganhar `imagemUrl`, a entidade passou a exigir a coluna correspondente **também na tabela de auditoria**; com `ddl-auto=validate`, alterar apenas `posts` derruba a aplicação no start, com o Hibernate acusando a coluna faltante em `posts_aud`.
+
+É o custo estrutural de manter auditoria por snapshot: **cada evolução de entidade auditada é uma evolução de duas tabelas**. O `validate` transforma esse custo em algo seguro — o esquecimento vira falha imediata e determinística no start, e não uma revisão silenciosamente incompleta descoberta meses depois, quando alguém for consultar o histórico e a capa não estiver lá.
+
+A coluna guarda **apenas a referência** (caminho ou URL), nunca o binário. Manter blobs na tabela do feed inflaria cada leitura da consulta principal — que é ordenada, paginada e a mais quente da aplicação — e, pior, duplicaria a imagem inteira em `posts_aud` a cada revisão do post.
+
+A capa **é auditada** de propósito: trocar a imagem de um post é uma edição editorial, e precisa aparecer no histórico junto do texto. `Curtida` segue de fora da auditoria pelos motivos já discutidos na seção de modelagem — a decisão é por entidade, e cada uma tem sua justificativa.
+
+O campo é nulável: posts sem capa são a maioria, e exigir imagem quebraria todo o conteúdo já publicado. Por isso a migration não precisa de `UPDATE` de retrocarga — as linhas existentes ficam com `NULL`, que é exatamente o estado correto para elas.
 
 **A carga inicial não está em migration.** O `DataLoader` grava pelos repositórios porque um seed em SQL bruto entraria por baixo do Hibernate e **não geraria revisão nenhuma** — o histórico dos registros semeados começaria vazio, criando um ponto cego bem no dado mais visível da aplicação. Passando por JPA, cada registro inicial nasce com sua revisão de criação atribuída a `sistema`.
 

@@ -9,7 +9,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Hibernate Envers](https://img.shields.io/badge/Hibernate_Envers-7.2-59666C?logo=hibernate&logoColor=white)](https://hibernate.org/orm/envers/)
 [![Flyway](https://img.shields.io/badge/Flyway-11.14-CC0200?logo=flyway&logoColor=white)](https://flywaydb.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.9-C71A36?logo=apachemaven&logoColor=white)](https://maven.apache.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
@@ -80,7 +80,7 @@ Persistência real não é só trocar o banco. É garantir que os dados sobreviv
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  Front-End (Next.js 15)                        localhost:13000    │
+│  Front-End (Next.js 16)                        localhost:13000    │
 └──────────────────────────────┬───────────────────────────────────┘
                                │ HTTP + header X-Usuario-Id
                                ▼
@@ -199,7 +199,7 @@ TP2-PB_persistencia/
 │   ├── RELATORIO_TP2-PB.md                 # ← relatório técnico consolidado
 │   ├── images/card.svg
 │   └── screenshots/
-├── frontend/                               # Next.js 15 + TypeScript
+├── frontend/                               # Next.js 16 + TypeScript
 ├── src/main/java/com/andre/monolito_infnethub/
 │   ├── auditoria/                          # ← novo: contexto, filtro, revisão, listener
 │   ├── config/                             # AuditoriaConfig, CorsConfig, DataLoader
@@ -414,7 +414,7 @@ Os endpoints do TP1 mantêm o mesmo contrato — o front-end continua funcionand
 | Migrations | Flyway 11.14 |
 | Validação | Spring Validation (Jakarta Bean Validation) |
 | Boilerplate | Lombok |
-| Front-End | Next.js 15 + TypeScript + React 19 |
+| Front-End | Next.js 16 + TypeScript + React 19 |
 | Estilização | CSS Modules |
 | Testes | JUnit 5 + AssertJ + `@DataJpaTest` + `@SpringBootTest` |
 | Testes de API | Bruno |
@@ -455,7 +455,7 @@ https://unsplash.com/pt-br/fotografias/um-grupo-de-pessoas-andando-em-uma-calcad
   <a href="https://maven.apache.org/"><img src="https://img.shields.io/badge/Built%20with-Maven-C71A36?logo=apachemaven&logoColor=white" alt="Maven"></a>
   <a href="https://spring.io/projects/spring-boot"><img src="https://img.shields.io/badge/Powered%20by-Spring_Boot-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot"></a>
   <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/Data-PostgreSQL_18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL 18"></a>
-  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Front--End-Next.js_15-000000?logo=nextdotjs&logoColor=white" alt="Next.js 15"></a>
+  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Front--End-Next.js_16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16"></a>
 </p>
 
 <a href="doc/images/card.svg">
